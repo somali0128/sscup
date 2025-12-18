@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="300" height="300">
+  <!-- Background -->
+  <rect width="200" height="200" fill="#f0f0f0"/>
+  
+  <!-- Warning stripes -->
+  <defs>
+    <pattern id="stripes" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="10" height="20" fill="#ffcc00"/>
+      <rect x="10" width="10" height="20" fill="#000000"/>
+    </pattern>
+  </defs>
+  
+  <!-- Construction barrier -->
+  <rect x="30" y="120" width="140" height="20" fill="url(#stripes)" stroke="#333" stroke-width="2"/>
+  <rect x="25" y="135" width="10" height="50" fill="#8b4513"/>
+  <rect x="165" y="135" width="10" height="50" fill="#8b4513"/>
+  
+  <!-- Traffic cone 1 -->
+  <polygon points="60,110 50,140 70,140" fill="#ff6600" stroke="#333" stroke-width="1"/>
+  <rect x="48" y="140" width="24" height="8" fill="#333"/>
+  <polygon points="60,85 55,95 65,95" fill="#ffffff"/>
+  <polygon points="60,95 53,105 67,105" fill="#ffffff"/>
+  
+  <!-- Traffic cone 2 -->
+  <polygon points="140,110 130,140 150,140" fill="#ff6600" stroke="#333" stroke-width="1"/>
+  <rect x="128" y="140" width="24" height="8" fill="#333"/>
+  <polygon points="140,85 135,95 145,95" fill="#ffffff"/>
+  <polygon points="140,95 133,105 147,105" fill="#ffffff"/>
+  
+  <!-- Caution sign -->
+  <polygon points="100,30 120,60 80,60" fill="#ffcc00" stroke="#333" stroke-width="2"/>
+  <text x="100" y="55" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#000">!</text>
+  
+  <!-- Tools -->
+  <g transform="translate(90, 75)">
+    <!-- Wrench -->
+    <path d="M-5,-5 L-5,5 L-3,7 L3,7 L5,5 L5,-3 L3,-5 Z" fill="#666" stroke="#333" stroke-width="0.5"/>
+    <circle cx="0" cy="0" r="3" fill="none" stroke="#333" stroke-width="1"/>
+  </g>
+</svg>
