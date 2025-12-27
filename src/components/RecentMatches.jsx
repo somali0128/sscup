@@ -42,9 +42,21 @@ function RecentMatches({ matches, news }) {
               <span className="px-3 py-1 bg-[#FFA500] text-white rounded-full text-sm font-medium">
                 {currentMatch.status}
               </span>
-              <button className="px-6 py-2 bg-[#1E90FF] text-white rounded-lg font-medium hover:bg-[#1873CC] transition-colors duration-200 transform hover:scale-105">
-                立即报名
-              </button>
+              {currentMatch.title === '【雀魂】雀神杯' ? (
+                <a
+                  href="/mahjong-cup-registration"
+                  className="px-6 py-2 bg-[#1E90FF] text-white rounded-lg font-medium hover:bg-[#1873CC] transition-colors duration-200 transform hover:scale-105 inline-block text-center"
+                >
+                  立即参加
+                </a>
+              ) : (
+                <button 
+                  disabled
+                  className="px-6 py-2 bg-gray-400 text-white rounded-lg font-medium cursor-not-allowed opacity-60"
+                >
+                  立即报名
+                </button>
+              )}
             </div>
 
             {/* 轮播指示器 */}

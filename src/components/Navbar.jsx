@@ -8,7 +8,7 @@ function Navbar() {
     { name: '近期比赛', href: '#recent-matches' },
     { name: '往期比赛', href: '#past-matches' },
     { name: '排行榜', href: '#leaderboard' },
-    { name: '查询功能', href: '#search' },
+    // { name: '查询功能', href: '#search' },
     { name: '关于', href: '#about' },
   ];
 
