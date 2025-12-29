@@ -43,3 +43,16 @@ section[id] {
 ::-webkit-scrollbar-thumb:hover {
   background: #1873CC;
 }
+
+/* 动态边框动画 */
+@keyframes gradient-border {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}

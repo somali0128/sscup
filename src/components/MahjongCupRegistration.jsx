@@ -154,7 +154,7 @@ function MahjongCupRegistration() {
                 <p className="text-lg">
                   你是否曾因为一张牌彻夜难眠？<br/>
                   你是否坚信"这把是我运气不佳"？<br/>
-                  你是否想在众目睽睽之下，凑出清一色一条龙？
+                  你是否想在众目睽睽之下，打出役满绝世好牌？
                 </p>
                 <p className="text-lg font-semibold text-[#1E90FF]">
                   臭鱼烂虾杯 · 雀魂篇 正式开启报名！
@@ -184,26 +184,39 @@ function MahjongCupRegistration() {
               <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
                 <h4 className="text-lg font-bold text-gray-800 mb-2">报名条件</h4>
                 <p className="text-gray-700">
-                  会打雀魂·万象修罗即可，心态爆炸请自备
+                  会打雀魂·万象修罗即可
                 </p>
               </div>
 
               {/* 活动奖品 */}
-              <div className="bg-gradient-to-r from-[#FFD700] via-[#FFA500] to-[#FF6347] rounded-lg p-6 text-white">
-                <h4 className="text-xl font-bold mb-4 flex items-center">
+              <div className="bg-yellow-50 rounded-lg p-6">
+                <h4 className="text-xl font-bold mb-4 flex items-center text-gray-800">
                   <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                   活动奖品
                 </h4>
                 <div className="space-y-3">
-                  <div className="bg-white/20 rounded-lg p-4 backdrop-blur-sm">
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
                     <div className="flex items-center mb-2">
-                      <h5 className="text-lg font-bold">总冠军</h5>
+                      <h5 className="text-lg font-bold">最终积分榜前3名</h5>
                     </div>
                     <div className="ml-13 space-y-1">
                       <p className="text-sm opacity-90">• 指定舰长 × 1</p>
                       <p className="text-sm opacity-90">• 荣誉头衔</p>
+                    </div>
+                  </div>
+                  
+                  {/* 赞助信息 - 动态边框效果 */}
+                  <div className="relative mt-4 p-[2px] rounded-lg overflow-hidden" style={{
+                    background: 'linear-gradient(90deg, #FFD700, #FFA500, #FF6347, #FFD700)',
+                    backgroundSize: '200% 200%',
+                    animation: 'gradient-border 3s ease infinite'
+                  }}>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                      <p className="text-sm font-semibold text-center">
+                        本次活动奖品由<span className="text-yellow-200 font-bold">"神神气气羊教授"</span>大力赞助！
+                      </p>
                     </div>
                   </div>
                 </div>
