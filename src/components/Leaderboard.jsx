@@ -111,7 +111,7 @@ function Leaderboard({ players }) {
     <section id="leaderboard" className="py-12 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
-          排行榜
+          排行榜（暂未开放，以下为临时数据）
         </h2>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
