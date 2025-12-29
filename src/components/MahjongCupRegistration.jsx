@@ -51,8 +51,8 @@ function MahjongCupRegistration() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Banner区域 - 手机端隐藏 */}
-      <section className="relative w-full hidden md:block h-64 md:h-96 overflow-hidden">
+      {/* Banner区域 */}
+      <section className="relative w-full h-64 md:h-96 overflow-hidden">
         {/* Banner背景图片 */}
         <img 
           src="/header_schinese.jpg" 
@@ -74,8 +74,8 @@ function MahjongCupRegistration() {
         </div>
       </section>
 
-      {/* 顶部导航链接 - 手机端固定在顶部，桌面端在navbar下方 */}
-      <nav className="sticky top-0 md:top-16 bg-white shadow-md z-40 border-b">
+      {/* 顶部导航链接 - 手机端隐藏，桌面端在navbar下方 */}
+      <nav className="hidden md:block sticky top-16 bg-white shadow-md z-40 border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap justify-center gap-4 md:gap-8 py-4">
             <a
