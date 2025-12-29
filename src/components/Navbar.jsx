@@ -1,7 +1,11 @@
 import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isRegistrationPage = location.pathname === '/mahjong-cup-registration';
 
   const navItems = [
     { name: '首页', href: '#home' },
@@ -11,6 +15,28 @@ function Navbar() {
     // { name: '查询功能', href: '#search' },
     { name: '关于', href: '#about' },
   ];
+
+  // 处理导航点击，如果在报名页，需要跳转到首页并滚动
+  const handleNavClick = (e, href) => {
+    if (isRegistrationPage) {
+      e.preventDefault();
+      navigate(`/${href}`);
+      // 等待页面跳转后滚动到对应section
+      setTimeout(() => {
+        const hash = href.slice(1); // 移除 # 号
+        const element = document.getElementById(hash);
+        if (element) {
+          const navbarHeight = 64; // h-16 = 64px
+          const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+          window.scrollTo({
+            top: elementPosition - navbarHeight,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
+    }
+    // 如果在首页，让默认行为处理（锚点跳转）
+  };
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
@@ -32,7 +58,8 @@ function Navbar() {
               {navItems.map((item) => (
                 <a
                   key={item.name}
-                  href={item.href}
+                  href={isRegistrationPage ? `/${item.href}` : item.href}
+                  onClick={(e) => handleNavClick(e, item.href)}
                   className="text-gray-700 hover:text-[#1E90FF] px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
                 >
                   {item.name}
@@ -81,9 +108,12 @@ function Navbar() {
             {navItems.map((item) => (
               <a
                 key={item.name}
-                href={item.href}
+                href={isRegistrationPage ? `/${item.href}` : item.href}
+                onClick={(e) => {
+                  handleNavClick(e, item.href);
+                  setIsOpen(false);
+                }}
                 className="text-gray-700 hover:text-[#1E90FF] block px-3 py-2 rounded-md text-base font-medium transition-colors"
-                onClick={() => setIsOpen(false)}
               >
                 {item.name}
               </a>

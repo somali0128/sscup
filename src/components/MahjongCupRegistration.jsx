@@ -51,8 +51,8 @@ function MahjongCupRegistration() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Banner区域 */}
-      <section className="relative w-full h-64 md:h-96 overflow-hidden">
+      {/* Banner区域 - 手机端隐藏 */}
+      <section className="relative w-full hidden md:block h-64 md:h-96 overflow-hidden">
         {/* Banner背景图片 */}
         <img 
           src="/header_schinese.jpg" 
@@ -74,8 +74,8 @@ function MahjongCupRegistration() {
         </div>
       </section>
 
-      {/* 顶部导航链接 */}
-      <nav className="sticky top-16 bg-white shadow-md z-40 border-b">
+      {/* 顶部导航链接 - 手机端固定在顶部，桌面端在navbar下方 */}
+      <nav className="sticky top-0 md:top-16 bg-white shadow-md z-40 border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap justify-center gap-4 md:gap-8 py-4">
             <a
@@ -175,47 +175,16 @@ function MahjongCupRegistration() {
                   </div>
                   <div>
                     <p className="text-sm opacity-90 mb-1">人数上限</p>
-                    <p className="text-lg font-bold">32 人</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* 赛制速读 */}
-              <div className="bg-gray-50 rounded-lg p-6">
-                <h4 className="text-xl font-bold text-gray-800 mb-4">赛制速读</h4>
-                <div className="space-y-3">
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 w-6 h-6 bg-[#1E90FF] rounded-full flex items-center justify-center text-white font-bold text-sm mr-3 mt-0.5">
-                      ✓
-                    </div>
-                    <p className="text-gray-700">四人局</p>
-                  </div>
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 w-6 h-6 bg-[#1E90FF] rounded-full flex items-center justify-center text-white font-bold text-sm mr-3 mt-0.5">
-                      ✓
-                    </div>
-                    <p className="text-gray-700">每轮一场定胜负</p>
-                  </div>
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 w-6 h-6 bg-[#1E90FF] rounded-full flex items-center justify-center text-white font-bold text-sm mr-3 mt-0.5">
-                      ✓
-                    </div>
-                    <p className="text-gray-700">前两名晋级</p>
-                  </div>
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 w-6 h-6 bg-[#1E90FF] rounded-full flex items-center justify-center text-white font-bold text-sm mr-3 mt-0.5">
-                      ✓
-                    </div>
-                    <p className="text-gray-700">总决赛 打两场定冠军</p>
+                    <p className="text-lg font-bold">16 人</p>
                   </div>
                 </div>
               </div>
 
               {/* 报名须知 */}
               <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
-                <h4 className="text-lg font-bold text-gray-800 mb-2">报名须知</h4>
+                <h4 className="text-lg font-bold text-gray-800 mb-2">报名条件</h4>
                 <p className="text-gray-700">
-                  会打即可，心态爆炸请自备
+                  会打雀魂·万象修罗即可，心态爆炸请自备
                 </p>
               </div>
 
@@ -251,133 +220,189 @@ function MahjongCupRegistration() {
               活动规则
             </h2>
             <div className="space-y-8">
-              {/* 比赛总体结构 */}
+              {/* 一、赛事基本信息 */}
               <div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-4">比赛总体结构</h3>
-                <p className="text-gray-700 mb-4">
-                  本次比赛采用 <strong className="text-[#1E90FF]">多轮淘汰制</strong>：
-                </p>
-                <div className="bg-gradient-to-r from-[#1E90FF] to-[#00CED1] rounded-lg p-4 text-white mb-4">
-                  <p className="font-semibold text-lg">预选赛（多桌） → 晋级赛 → 总决赛（两场）</p>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                  <p className="text-gray-700">• 四人局（尽可能），每轮取前两名晋级；</p>
-                  <p className="text-gray-700">• 除总决赛外，其余轮次均为一场定胜负；</p>
-                  <p className="text-gray-700">• 总决赛打两场，两轮成绩总和决定冠军。</p>
-                </div>
-              </div>
-
-              {/* 参赛与分组规则 */}
-              <div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-4">参赛与分组规则</h3>
-                
+                <h3 className="text-2xl font-bold text-gray-800 mb-4">一、赛事基本信息</h3>
                 <div className="space-y-4">
                   <div className="bg-blue-50 rounded-lg p-4">
-                    <h4 className="text-lg font-bold text-gray-800 mb-3">比赛模式</h4>
-                    <div className="space-y-4 text-gray-700">
-                      <p>四人麻将，<strong>万象修罗规则</strong></p>
-                      
-                      {/* 规则图片 */}
-                      <div className="mt-4 space-y-4">
-                        <div className="bg-white rounded-lg p-2 shadow-sm">
-                          <img 
-                            src="/rule_1.png" 
-                            alt="雀魂万象修罗规则图1" 
-                            className="w-full h-auto rounded"
-                          />
-                        </div>
-                        <div className="bg-white rounded-lg p-2 shadow-sm">
-                          <img 
-                            src="/rule_2.png" 
-                            alt="雀魂万象修罗规则图2" 
-                            className="w-full h-auto rounded"
-                          />
-                        </div>
-                      </div>
+                    <div className="space-y-3 text-gray-700">
+                      <p><strong className="text-gray-800">赛事名称：</strong>臭鱼烂虾杯 · 雀魂积分赛（万象修罗）</p>
+                      <p><strong className="text-gray-800">比赛形式：</strong>线上积分制比赛</p>
+                      <p><strong className="text-gray-800">参赛人数：</strong>16 人</p>
+                      <p><strong className="text-gray-800">默认对局模式：</strong>四人麻将（万象修罗规则）</p>
                     </div>
                   </div>
-
-                  <div className="bg-green-50 rounded-lg p-4">
-                    <h4 className="text-lg font-bold text-gray-800 mb-3">分组方式</h4>
-                    <div className="space-y-2 text-gray-700">
-                      <p>• 所有非种子选手：<strong>随机分组</strong></p>
-                      <p>• 种子选手最多八名，种子选手首轮轮空。</p>
-                    </div>
+                  <div className="bg-gradient-to-r from-[#1E90FF] to-[#00CED1] rounded-lg p-4 text-white">
+                    <h4 className="text-lg font-bold mb-2">赛事定位：</h4>
+                    <p className="mb-2">非淘汰 · 多轮对局 · 积分制</p>
+                    <p className="text-sm opacity-90">一把定不了命运，但会留下痕迹。</p>
                   </div>
-
-                  <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
-                    <h4 className="text-lg font-bold text-gray-800 mb-2">注：什么是种子选手？</h4>
-                    <p className="text-gray-700">
-                      种子选手优先在往期活动高活跃成员，主播和特邀嘉宾中选择。
-                    </p>
+                  
+                  {/* 规则图片 */}
+                  <div className="mt-4 space-y-4">
+                    <div className="bg-white rounded-lg p-2 shadow-sm">
+                      <img 
+                        src="/rule_1.png" 
+                        alt="雀魂万象修罗规则图1" 
+                        className="w-full h-auto rounded"
+                      />
+                    </div>
+                    <div className="bg-white rounded-lg p-2 shadow-sm">
+                      <img 
+                        src="/rule_2.png" 
+                        alt="雀魂万象修罗规则图2" 
+                        className="w-full h-auto rounded"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* 晋级规则 */}
+              {/* 二、赛制总览 */}
               <div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-4">晋级规则</h3>
+                <h3 className="text-2xl font-bold text-gray-800 mb-4">二、赛制总览</h3>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <p className="text-gray-700">
+                    本赛事采用 <strong className="text-[#1E90FF]">非淘汰积分制</strong>，<br/>
+                    全员多轮对局，累计积分排名，<br/>
+                    最终按总积分高低决定名次。
+                  </p>
+                </div>
+              </div>
+
+              {/* 三、比赛结构 */}
+              <div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-4">三、比赛结构</h3>
                 <div className="space-y-4">
-                  {/* 首轮 */}
-                  <div className="bg-white border-2 border-[#1E90FF] rounded-lg p-5">
-                    <div className="flex items-center mb-3">
-                      <div className="w-10 h-10 bg-[#1E90FF] rounded-full flex items-center justify-center text-white font-bold mr-3">
-                        1
+                  <div className="bg-green-50 rounded-lg p-4">
+                    <h4 className="text-lg font-bold text-gray-800 mb-3">3.1 对局轮次</h4>
+                    <div className="space-y-2 text-gray-700">
+                      <p>• 全体选手参与 <strong>5轮比赛</strong></p>
+                      <p>• 每轮：</p>
+                      <div className="ml-4 space-y-1">
+                        <p>- 重新分桌</p>
+                        <p>- 每桌进行 1 场对局</p>
+                        <p>- 比赛过程中不设淘汰</p>
                       </div>
-                      <h4 className="text-lg font-bold text-gray-800">首轮海选</h4>
-                    </div>
-                    <div className="ml-14 space-y-2 text-gray-700">
-                      <p>• 8 位种子首轮轮空 → 自动进入第二轮</p>
-                      <p>• 首轮海选 24 人，且 6 桌同时进行（每桌4人）</p>
-                      <p>• 每桌第 1 名直接晋级（共 6 人）</p>
-                      <p>• 所有桌第 2 名进入"复活池"，扔骰子拼大小，取 2 人晋级（共 2 人）</p>
-                      <p className="text-[#1E90FF] font-semibold">运气也是实力的一部分！</p>
                     </div>
                   </div>
-
-                  {/* 第二轮 */}
-                  <div className="bg-white border-2 border-[#00CED1] rounded-lg p-5">
-                    <div className="flex items-center mb-3">
-                      <div className="w-10 h-10 bg-[#00CED1] rounded-full flex items-center justify-center text-white font-bold mr-3">
-                        2
+                  <div className="bg-blue-50 rounded-lg p-4">
+                    <h4 className="text-lg font-bold text-gray-800 mb-3">3.2 分桌规则</h4>
+                    <div className="space-y-2 text-gray-700">
+                      <p>• 原则上使用 <strong>四人桌</strong></p>
+                      <p>• 每轮结束后：</p>
+                      <div className="ml-4 space-y-1">
+                        <p>- 更新总积分榜</p>
+                        <p>- 重新分桌</p>
+                        <p>- 优先匹配之前没一起打过的人</p>
                       </div>
-                      <h4 className="text-lg font-bold text-gray-800">第二轮晋级赛</h4>
-                    </div>
-                    <div className="ml-14 space-y-2 text-gray-700">
-                      <p>• 16人，4桌同时进行</p>
-                      <p>• 所有桌前两名晋级（共8人）</p>
-                    </div>
-                  </div>
-
-                  {/* 第三轮 */}
-                  <div className="bg-white border-2 border-[#FFA500] rounded-lg p-5">
-                    <div className="flex items-center mb-3">
-                      <div className="w-10 h-10 bg-[#FFA500] rounded-full flex items-center justify-center text-white font-bold mr-3">
-                        3
-                      </div>
-                      <h4 className="text-lg font-bold text-gray-800">第三轮半决赛</h4>
-                    </div>
-                    <div className="ml-14 space-y-2 text-gray-700">
-                      <p>• 两桌同时进行</p>
-                      <p>• 每桌第一名进入总决赛</p>
-                    </div>
-                  </div>
-
-                  {/* 第四轮 */}
-                  <div className="bg-white border-2 border-[#FFD700] rounded-lg p-5">
-                    <div className="flex items-center mb-3">
-                      <div className="w-10 h-10 bg-[#FFD700] rounded-full flex items-center justify-center text-white font-bold mr-3">
-                        4
-                      </div>
-                      <h4 className="text-lg font-bold text-gray-800">第四轮总决赛</h4>
-                    </div>
-                    <div className="ml-14 space-y-2 text-gray-700">
-                      <p>• 共两轮，两轮过后总积分高者为总冠军</p>
-                      <p>• 若积分相同，则掷骰子决定</p>
                     </div>
                   </div>
                 </div>
               </div>
+
+              {/* 四、积分计算规则 */}
+              <div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-4">四、积分计算规则</h3>
+                <div className="space-y-4">
+                  <div className="bg-white border-2 border-[#1E90FF] rounded-lg p-5">
+                    <h4 className="text-lg font-bold text-gray-800 mb-3">4.1 四人场积分计算</h4>
+                    <div className="space-y-2 text-gray-700">
+                      <p>• 使用雀魂对局结束时显示的 <strong>最终得点</strong></p>
+                      <p>• 每名选手在该局获得的得点：<strong>直接计入个人总积分</strong></p>
+                      <p>• 所有四人场对局：</p>
+                      <div className="ml-4 space-y-1">
+                        <p>- 不做额外换算</p>
+                        <p>- 不设名次加权</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-white border-2 border-[#FFA500] rounded-lg p-5">
+                    <h4 className="text-lg font-bold text-gray-800 mb-3">4.2 三人场的处理规则</h4>
+                    <div className="space-y-3 text-gray-700">
+                      <p>在以下情况可能出现三人场：</p>
+                      <div className="ml-4 space-y-1">
+                        <p>• 参赛人数临时不足</p>
+                        <p>• 掉线 / 异常情况</p>
+                        <p>• 赛事流程需要临时调整</p>
+                      </div>
+                      <p>为保证积分公平性，三人场得点将进行比例换算后计入总积分。</p>
+                      <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                        <h5 className="font-bold text-gray-800 mb-2">三人场积分换算方式</h5>
+                        <div className="space-y-2">
+                          <p>• 以 <strong>四人场为基准</strong></p>
+                          <p>• 三人场得点 × 4 ÷ 3</p>
+                          <p>• 换算后的结果：计入个人总积分</p>
+                          <p>• 小数部分保留到整数（四舍五入）</p>
+                        </div>
+                        <div className="mt-3 bg-white rounded p-3">
+                          <p className="font-semibold mb-1">示例：</p>
+                          <p>三人场某选手得点：+12,000</p>
+                          <p>换算后计入积分：12,000 × 4 ÷ 3 ≈ <strong>16,000</strong></p>
+                        </div>
+                        <p className="text-sm mt-3 text-gray-600">
+                          说明：该换算仅用于 人数差异带来的期望值修正，不代表三人场与四人场在竞技层面的完全等价。
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-lg font-bold text-gray-800 mb-3">4.3 积分统一原则</h4>
+                    <div className="space-y-2 text-gray-700">
+                      <p>所有对局（四人 / 三人）：最终都只体现在 <strong>"总积分榜"</strong></p>
+                      <p>不额外区分：</p>
+                      <div className="ml-4 space-y-1">
+                        <p>• 对局类型</p>
+                        <p>• 桌次</p>
+                        <p>• 对手强弱</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 五、排名与决赛安排 */}
+              <div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-4">五、排名与决赛安排</h3>
+                <div className="space-y-4">
+                  <div className="bg-green-50 rounded-lg p-4">
+                    <h4 className="text-lg font-bold text-gray-800 mb-3">5.1 排名规则</h4>
+                    <div className="space-y-2 text-gray-700">
+                      <p>• 按 <strong>总积分从高到低</strong> 排名</p>
+                      <p>• 若总积分相同：</p>
+                      <div className="ml-4 space-y-1">
+                        <p>- 扔骰子决定（祝你好运）</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 六、异常与特殊情况 */}
+              <div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-4">六、异常与特殊情况</h3>
+                <div className="space-y-4">
+                  <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                    <h4 className="text-lg font-bold text-gray-800 mb-3">6.1 掉线处理</h4>
+                    <div className="space-y-2 text-gray-700">
+                      <p>• 掉线后允许短时间重连</p>
+                      <p>• 无法重连者：按当局最低得点结算</p>
+                      <p>• 是否重开由主办方裁定</p>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-lg font-bold text-gray-800 mb-3">6.2 规则调整权</h4>
+                    <div className="space-y-2 text-gray-700">
+                      <p>若出现规则未覆盖情况：</p>
+                      <div className="ml-4 space-y-1">
+                        <p>• 由臭鱼烂虾杯组委会现场裁定</p>
+                        <p>• 所有裁定结果为最终结果，不接受赛后申诉</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         </section>
