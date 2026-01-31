@@ -3,21 +3,38 @@
 export const recentMatches = [
   {
     id: 1,
+    title: '【无畏契约】挑战者杯',
+    date: '2026年2月',
+    description: '臭鱼烂虾首次无畏契约3v5娱乐赛！',
+    status: '筹备中',
+  },
+  {
+    id: 2,
     title: '【雀魂】雀神杯',
     date: '2026年初',
     description: '事已至此，先打麻将吧！',
-    status: '筹备中',
+    status: '已完赛',
   },
 ];
 
 export const latestNews = [
   {
     id: 1,
+    date: '2026-01-30',
+    content: '2026年初【无畏契约】挑战者杯活动筹备中，敬请期待！',
+  },
+  {
+    id: 2,
+    date: '2026-01-30',
+    content: '【雀魂】雀神杯活动圆满结束！恭喜濑濑获得冠军！',
+  },
+  {
+    id: 3,
     date: '2025-12-22',
     content: '2026年初【雀魂】雀神杯活动筹备中，敬请期待！',
   },
   {
-    id: 2,
+    id: 4,
     date: '2025-12-20',
     content: '臭鱼烂虾杯官网上线啦！',
   },
