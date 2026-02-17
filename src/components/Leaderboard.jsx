@@ -1,4 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
+import Tippy from '@tippyjs/react';
+import 'tippy.js/dist/tippy.css';
 
 function Leaderboard({ players }) {
   const [displayedScores, setDisplayedScores] = useState({});
@@ -11,8 +13,7 @@ function Leaderboard({ players }) {
   // 处理B站图片URL，如果referrerPolicy不够，可以使用代理
   const getImageUrl = (url) => {
     if (!url) return null;
-    // 如果是B站图片链接，可以尝试使用代理（如果需要）
-    // 例如：return `https://images.weserv.nl/?url=${encodeURIComponent(url)}`;
+
     return url;
   };
 
@@ -110,9 +111,21 @@ function Leaderboard({ players }) {
   return (
     <section id="leaderboard" className="py-12 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
-          排行榜（暂未开放，以下为临时数据）
-        </h2>
+        <div className="inline-flex items-center gap-2 mb-8">
+          <h2 className="text-3xl font-bold text-gray-800 text-center">
+            排行榜
+          </h2>
+          <Tippy
+            content="活跃分数由参与活动与荣誉成就累计获得。参与活动获得基础积分，荣誉标签根据稀有度（绿/蓝/紫/橙）获得额外积分。"
+            placement="top"
+            arrow={true}
+            theme="dark"
+          >
+            <span className="inline-flex items-center justify-center w-5 h-5 text-sm text-gray-500 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors cursor-help">
+              ?
+            </span>
+          </Tippy>
+        </div>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sortedPlayers.map((player, index) => {
@@ -175,20 +188,26 @@ function Leaderboard({ players }) {
                         const tagDescription = typeof tag === 'string' ? '' : tag.description;
                         const tagRarity = typeof tag === 'object' ? tag.rarity : null;
                         
+                        const tagContent = (
+                          <span
+                            className={`${getHonorTagStyle(rank, tagRarity)} cursor-help`}
+                          >
+                            {tagName}
+                          </span>
+                        );
                         return (
-                          <div key={tagIndex} className="relative group">
-                            <span
-                              className={`${getHonorTagStyle(rank, tagRarity)} cursor-help`}
-                            >
-                              {tagName}
-                            </span>
-                            {tagDescription && (
-                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none whitespace-nowrap z-10 shadow-lg">
-                                {tagDescription}
-                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
-                                  <div className="border-4 border-transparent border-t-gray-900"></div>
-                                </div>
-                              </div>
+                          <div key={tagIndex}>
+                            {tagDescription ? (
+                              <Tippy
+                                content={tagDescription}
+                                placement="top"
+                                arrow={true}
+                                theme="dark"
+                              >
+                                {tagContent}
+                              </Tippy>
+                            ) : (
+                              tagContent
                             )}
                           </div>
                         );
