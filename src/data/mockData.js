@@ -4,9 +4,10 @@ export const recentMatches = [
   {
     id: 1,
     title: '【无畏契约】挑战者杯',
-    date: '2026年2月',
+    date: '2026年2月27日完赛',
     description: '臭鱼烂虾首次无畏契约3v5娱乐赛！',
-    status: '筹备中',
+    status: '已完赛',
+    actionHref: 'https://www.bilibili.com/video/BV1p5ABzMEtg/',
   },
   {
     id: 2,
@@ -14,14 +15,15 @@ export const recentMatches = [
     date: '2026年初',
     description: '事已至此，先打麻将吧！',
     status: '已完赛',
+    actionHref: '/mahjong-cup-registration',
   },
 ];
 
 export const latestNews = [
   {
     id: 1,
-    date: '2026-01-30',
-    content: '2026年初【无畏契约】挑战者杯活动筹备中，敬请期待！',
+    date: '2026-02-27',
+    content: '【无畏契约】挑战者杯已于2026年2月27日完赛，感谢各位参与！',
   },
   {
     id: 2,
@@ -44,30 +46,30 @@ export const leaderboardData = [
   { 
     id: 1, 
     name: '神神气气羊教授', 
-    score: 5100, 
+    score: 4900, 
     avatar: 'https://i0.hdslb.com/bfs/face/f424de93e57391eb8a71760263c403fb5e089dca.jpg@128w_128h_1c_1s.webp',
     bilibiliLink: '13793514',
     honorTags: [
       { name: '解说员', description: '曾担任比赛解说', rarity: 'purple' },
       { name: '夯', description: '在无畏契约赛前分组时被分配为夯水准', rarity: 'orange' },
-      { name: '全勤', description: '参与了目前所有活动', rarity: 'blue' },
       { name: '国士无双', description: '在雀魂比赛中打出了国士无双', rarity: 'green' }
     ]
   },
   { 
     id: 2, 
     name: '季秋秋Autumn', 
-    score: 4200, 
+    score: 5700, 
     avatar: 'https://i0.hdslb.com/bfs/face/1cec12fd3abb72479eed1d514aaa39d7a6c3be4b.jpg@128w_128h_1c_1s.webp',
     bilibiliLink: '376978534',
     honorTags: [
-      { name: '全勤', description: '参与了目前所有活动', rarity: 'blue' }
+      { name: '全勤', description: '参与了目前所有活动', rarity: 'blue' },
+      { name: '奥丁神', description: '在挑战者杯中用奥丁1v3力克千钧', rarity: 'orange' }
     ]
   },
   { 
     id: 3, 
     name: '孤狼飞冰', 
-    score: 4500, 
+    score: 5500, 
     avatar: 'https://i0.hdslb.com/bfs/face/bdde5bbfd6ac183a7315af212c535cfdeae37fc8.jpg@128w_128h_1c_1s.webp',
     bilibiliLink: '1694579642',
     honorTags: [
@@ -79,7 +81,7 @@ export const leaderboardData = [
   { 
     id: 4, 
     name: '樾哥Soma', 
-    score: 4600, 
+    score: 5600, 
     avatar: 'https://i0.hdslb.com/bfs/face/c08d7214613a5b4938def0954da9b71b8f113d9f.jpg@128w_128h_1c_1s.webp',
     bilibiliLink: '290997685',
     honorTags: [
@@ -111,7 +113,7 @@ export const leaderboardData = [
   { 
     id: 7, 
     name: '殇', 
-    score: 1200, 
+    score: 2200, 
     avatar: '',
     bilibiliLink: '',
     honorTags: [
@@ -186,6 +188,81 @@ export const leaderboardData = [
       { name: '雀魂季军', description: '在雀魂比赛中获得季军', rarity: 'blue' },
     ]
   },
+  { 
+    id: 15, 
+    name: '皓白白_Aria', 
+    score: 1500, 
+    avatar: 'https://i1.hdslb.com/bfs/face/5bec8a8daaca9eef4ec21720c5c5ce33db69b7ca.jpg@128w_128h_1c_1s.webp',
+    bilibiliLink: '3546907785825016',
+    honorTags: [
+      { name: '挑战者杯MVP', description: '下次去当捍卫者', rarity: 'orange' },
+    ]
+  },
+  { 
+    id: 16, 
+    name: 'Luminous_T', 
+    score: 1000, 
+    avatar: '',
+    bilibiliLink: '',
+    honorTags: [
+    ]
+  },
+  { 
+    id: 17, 
+    name: '三千', 
+    score: 1000, 
+    avatar: '',
+    bilibiliLink: '',
+    honorTags: [
+      { name: '假钻石', description: '在捍卫者表现过于唐', rarity: 'green' },
+    ]
+  },
+  { 
+    id: 18, 
+    name: '小章鱼', 
+    score: 1000, 
+    avatar: '',
+    bilibiliLink: '',
+    honorTags: [
+    ]
+  },
+  { 
+    id: 19, 
+    name: '白砂糖', 
+    score: 1100, 
+    avatar: '',
+    bilibiliLink: '',
+    honorTags: [
+    ]
+  },
+  { 
+    id: 20, 
+    name: '泡泡坤羽子', 
+    score: 1200, 
+    avatar: '',
+    bilibiliLink: '',
+    honorTags: [
+      { name: '老六', description: '在无畏契约挑战者杯中过于阴暗', rarity: 'green' },
+    ]
+  },
+  { 
+    id: 21, 
+    name: '雨宦', 
+    score: 1000, 
+    avatar: '',
+    bilibiliLink: '',
+    honorTags: [
+    ]
+  },
+  { 
+    id: 22, 
+    name: '抖抖身子', 
+    score: 1000, 
+    avatar: '',
+    bilibiliLink: '',
+    honorTags: [
+    ]
+  },
 ];
 
 export const pastMatches = [
@@ -220,5 +297,13 @@ export const pastMatches = [
     description: '恭喜濑濑在16位参与者中夺得冠军！',
     quarter: '2026 Q1',
     resultLink: 'https://www.bilibili.com/opus/1163930137190727687',
+  },
+  {
+    id: 5,
+    title: '【无畏契约】挑战者杯3v5娱乐赛',
+    date: '2026-02-27',
+    description: '臭鱼烂虾首次无畏契约3v5娱乐赛，于2月27日完赛。',
+    quarter: '2026 Q1',
+    resultLink: 'https://www.bilibili.com/video/BV1p5ABzMEtg/',
   },
 ];

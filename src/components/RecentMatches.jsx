@@ -47,6 +47,8 @@ function RecentMatches({ matches, news }) {
             <div className="space-y-4">
               {matches.map((match) => {
                 const action = getActionConfig(match.status);
+                const href = match.actionHref ?? '/mahjong-cup-registration';
+                const isExternal = /^https?:\/\//i.test(href);
                 return (
                   <div
                     key={match.id}
@@ -69,7 +71,15 @@ function RecentMatches({ matches, news }) {
                     <div className="flex items-center justify-end">
                       {action.active ? (
                         <a
-                          href="/mahjong-cup-registration"
+                          href={href}
+                          target={isExternal ? '_blank' : undefined}
+                          rel={isExternal ? 'noopener noreferrer' : undefined}
+                          onClick={
+                            href === '#'
+                              ? (e) => e.preventDefault()
+                              : undefined
+                          }
+                          title={href === '#' ? '赛况页面即将更新' : undefined}
                           className={`px-6 py-2 rounded-lg font-medium transition-colors duration-200 transform hover:scale-105 inline-block text-center ${
                             match.status === '已完赛'
                               ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -104,7 +114,7 @@ function RecentMatches({ matches, news }) {
               <h3 className="text-xl font-bold text-gray-800">最新新闻</h3>
             </div>
             
-            <div className="space-y-4 max-h-64 overflow-y-auto">
+            <div className="space-y-4 overflow-y-auto">
               {news && news.map((item) => (
                 <div key={item.id} className="border-l-4 border-[#00CED1] pl-4 py-2 hover:bg-gray-50 rounded transition-colors">
                   <p className="text-sm text-gray-500 mb-1">{item.date}</p>
