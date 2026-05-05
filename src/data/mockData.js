@@ -2,7 +2,7 @@
 
 export const recentMatches = [
   {
-    id: 1,
+    id: 2,
     title: '【无畏契约】挑战者杯',
     date: '2026年2月27日完赛',
     description: '臭鱼烂虾首次无畏契约3v5娱乐赛！',
@@ -10,16 +10,21 @@ export const recentMatches = [
     actionHref: 'https://www.bilibili.com/video/BV1p5ABzMEtg/',
   },
   {
-    id: 2,
-    title: '【雀魂】雀神杯',
-    date: '2026年初',
-    description: '事已至此，先打麻将吧！',
-    status: '已完赛',
-    actionHref: '/mahjong-cup-registration',
+    id: 1,
+    title: '【街霸6】街霸杯',
+    date: '2026年5月',
+    description: '臭鱼烂虾首次街霸6比赛！',
+    status: '筹备中',
+    actionHref: '#',
   },
 ];
 
 export const latestNews = [
+  {
+    id: 1,
+    date: '2026-05-05',
+    content: '【街霸6】街霸杯活动筹备中，敬请期待！',
+  },
   {
     id: 1,
     date: '2026-02-27',
@@ -34,11 +39,6 @@ export const latestNews = [
     id: 3,
     date: '2025-12-22',
     content: '2026年初【雀魂】雀神杯活动筹备中，敬请期待！',
-  },
-  {
-    id: 4,
-    date: '2025-12-20',
-    content: '臭鱼烂虾杯官网上线啦！',
   },
 ];
 
