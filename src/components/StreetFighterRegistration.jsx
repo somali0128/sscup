@@ -93,9 +93,9 @@ function StreetFighterRegistration() {
         <div className="absolute inset-0 opacity-30 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-400/40 via-transparent to-transparent" />
         <div className="absolute inset-0 flex items-center justify-center px-4">
           <div className="text-center text-white">
-            <p className="text-sm md:text-base font-semibold text-amber-200/90 mb-2">Street Fighter 6</p>
+            <p className="text-sm md:text-base font-semibold text-amber-200/90 mb-2">街头霸王6</p>
             <h1 className="text-3xl md:text-5xl font-bold mb-3 drop-shadow-lg">
-              臭鱼烂虾街霸师徒杯
+              【臭鱼烂虾】街霸师徒杯
             </h1>
             <p className="text-lg md:text-xl text-white/90 drop-shadow-md">
               正式开启报名！
@@ -153,18 +153,16 @@ function StreetFighterRegistration() {
             <div className="grid md:grid-cols-2 gap-4 mb-8">
               <div className="rounded-xl border-2 border-[#1E90FF]/30 bg-blue-50/50 p-5">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-2xl">🏆</span>
                   <h3 className="text-lg font-bold text-gray-800">正式赛</h3>
                 </div>
-                <p className="text-gray-700 font-semibold">5月16日（周五）</p>
+                <p className="text-gray-700 font-semibold">5月16日（周六）</p>
                 <p className="text-gray-600">晚 20:00 - 23:00</p>
               </div>
               <div className="rounded-xl border-2 border-amber-500/40 bg-amber-50/60 p-5">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-2xl">🎭</span>
                   <h3 className="text-lg font-bold text-gray-800">师徒杯娱乐赛</h3>
                 </div>
-                <p className="text-gray-700 font-semibold">5月17日（周六）</p>
+                <p className="text-gray-700 font-semibold">5月17日（周日）</p>
                 <p className="text-gray-600">晚 20:00 - 23:00</p>
               </div>
             </div>
@@ -188,14 +186,13 @@ function StreetFighterRegistration() {
             <div className="space-y-6">
               <div className="rounded-xl border border-amber-800/20 bg-gradient-to-br from-stone-100 to-amber-50/80 p-6">
                 <h3 className="text-xl font-bold text-gray-800 mb-1 flex items-center gap-2">
-                  <span>🥉</span> 金属组
+                  金属组
                 </h3>
-                <p className="text-sm text-gray-600 mb-4">（Bronze / Silver / Gold）</p>
+                <p className="text-sm text-gray-600 mb-4">黑铁-黄金</p>
                 <p className="text-sm font-semibold text-gray-700 mb-2">适合：</p>
                 <ul className="list-disc list-inside text-gray-700 space-y-1 mb-4">
                   <li>新人玩家</li>
-                  <li>娱乐玩家</li>
-                  <li>正在修炼基本功的臭鱼们</li>
+                  <li>总游戏时长不足100h的玩家</li>
                 </ul>
                 <p className="text-sm text-gray-600">
                   <span className="font-semibold text-gray-800">预计人数：</span>8 - 12 人
@@ -204,9 +201,9 @@ function StreetFighterRegistration() {
 
               <div className="rounded-xl border border-cyan-600/25 bg-gradient-to-br from-cyan-50 to-sky-50 p-6">
                 <h3 className="text-xl font-bold text-gray-800 mb-1 flex items-center gap-2">
-                  <span>💎</span> 渡劫组
+                  渡劫组
                 </h3>
-                <p className="text-sm text-gray-600 mb-4">（Platinum / Diamond）</p>
+                <p className="text-sm text-gray-600 mb-4">白金-钻石</p>
                 <p className="text-sm font-semibold text-gray-700 mb-2">适合：</p>
                 <ul className="list-disc list-inside text-gray-700 space-y-1 mb-4">
                   <li>已经开始理解对局</li>
@@ -219,14 +216,13 @@ function StreetFighterRegistration() {
 
               <div className="rounded-xl border border-red-700/25 bg-gradient-to-br from-red-950/5 to-orange-50 p-6">
                 <h3 className="text-xl font-bold text-gray-800 mb-1 flex items-center gap-2">
-                  <span>👹</span> 大师组
+                  大师组
                 </h3>
-                <p className="text-sm text-gray-600 mb-4">（Master）</p>
+                <p className="text-sm text-gray-600 mb-4">Master</p>
                 <p className="text-sm font-semibold text-gray-700 mb-2">适合：</p>
                 <ul className="list-disc list-inside text-gray-700 space-y-1 mb-4">
                   <li>Master 段位玩家</li>
-                  <li>社区高手</li>
-                  <li>MR 怪物</li>
+                  <li>负分大师也是大师</li>
                 </ul>
                 <p className="text-sm text-gray-600">
                   <span className="font-semibold text-gray-800">预计人数：</span>2 - 4 人
@@ -257,7 +253,7 @@ function StreetFighterRegistration() {
               <ul className="list-disc list-inside text-gray-700 space-y-2">
                 <li>除总决赛外均为 BO3</li>
                 <li>总决赛为 BO5</li>
-                <li>根据实际报名人数决定具体淘汰形式</li>
+                <li>暂定为传统晋级赛，包含败者组，将根据实际报名人数决定具体淘汰形式</li>
                 <li>比赛默认线上进行</li>
               </ul>
             </div>
