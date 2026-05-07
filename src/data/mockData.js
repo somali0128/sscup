@@ -214,7 +214,6 @@ export const leaderboardData = [
     avatar: '',
     bilibiliLink: '',
     honorTags: [
-      { name: '假钻石', description: '在捍卫者表现过于唐', rarity: 'green' },
     ]
   },
   { 
@@ -233,6 +232,7 @@ export const leaderboardData = [
     avatar: '',
     bilibiliLink: '',
     honorTags: [
+      { name: '假钻石', description: '在捍卫者表现过于唐', rarity: 'green' },
     ]
   },
   { 
