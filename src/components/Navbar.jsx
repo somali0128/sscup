@@ -5,7 +5,9 @@ function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const isRegistrationPage = location.pathname === '/mahjong-cup-registration';
+  const isRegistrationPage =
+    location.pathname === '/mahjong-cup-registration' ||
+    location.pathname === '/sf6-registration';
 
   const navItems = [
     { name: '首页', href: '#home' },
