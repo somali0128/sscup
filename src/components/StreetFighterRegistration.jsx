@@ -4,12 +4,10 @@ import { useLocation } from 'react-router-dom';
 const initialForm = {
   gameId: '',
   rankCurrent: '',
-  rankPeak: '',
   mainCharacters: '',
   bracket: '',
   mentorCup: '',
   voiceOk: '',
-  contact: '',
 };
 
 function StreetFighterRegistration() {
@@ -66,12 +64,10 @@ function StreetFighterRegistration() {
       '',
       `1. 游戏ID：${form.gameId || '（未填）'}`,
       `2. 当前段位：${form.rankCurrent || '（未填）'}`,
-      `3. 历史最高段位：${form.rankPeak || '（未填）'}`,
-      `4. 常用角色：${form.mainCharacters || '（未填）'}`,
-      `5. 报名组别：${form.bracket || '（未填）'}`,
-      `6. 是否愿意参加师徒杯：${form.mentorCup || '（未填）'}`,
-      `7. 是否可语音：${form.voiceOk || '（未填）'}`,
-      `8. 联系方式：${form.contact || '（未填）'}`,
+      `3. 常用角色：${form.mainCharacters || '（未填）'}`,
+      `4. 报名组别：${form.bracket || '（未填）'}`,
+      `5. 是否愿意参加师徒杯：${form.mentorCup || '（未填）'}`,
+      `6. 是否可语音：${form.voiceOk || '（未填）'}`,
     ];
     return lines.join('\n');
   };
@@ -282,11 +278,6 @@ function StreetFighterRegistration() {
               </ul>
             </div>
 
-            <div className="rounded-xl bg-gray-900 text-white p-6 text-center">
-              <p className="text-sm text-amber-200/90 mb-2">🐟 臭鱼烂虾，也有梦想。</p>
-              <p className="text-gray-300 italic">「今天不求夺冠，只求少挨骂。」</p>
-              <p className="text-gray-300 italic mt-2">「真正的修行，从防住 DI 开始。」</p>
-            </div>
           </div>
         </section>
 
@@ -321,16 +312,7 @@ function StreetFighterRegistration() {
                 />
               </label>
               <label className="block">
-                <span className="text-sm font-medium text-gray-800">3. 历史最高段位</span>
-                <input
-                  type="text"
-                  value={form.rankPeak}
-                  onChange={(e) => setField('rankPeak', e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-[#1E90FF] focus:ring-2 focus:ring-[#1E90FF]/20"
-                />
-              </label>
-              <label className="block">
-                <span className="text-sm font-medium text-gray-800">4. 常用角色</span>
+                <span className="text-sm font-medium text-gray-800">3. 常用角色</span>
                 <input
                   type="text"
                   value={form.mainCharacters}
@@ -340,7 +322,7 @@ function StreetFighterRegistration() {
                 />
               </label>
               <fieldset>
-                <legend className="text-sm font-medium text-gray-800">5. 报名组别</legend>
+                <legend className="text-sm font-medium text-gray-800">4. 报名组别</legend>
                 <div className="mt-2 space-y-2">
                   {[
                     { value: '金属组（Bronze / Silver / Gold）', label: '🥉 金属组' },
@@ -362,7 +344,7 @@ function StreetFighterRegistration() {
                 </div>
               </fieldset>
               <fieldset>
-                <legend className="text-sm font-medium text-gray-800">6. 是否愿意参加师徒杯</legend>
+                <legend className="text-sm font-medium text-gray-800">5. 是否愿意参加师徒杯</legend>
                 <div className="mt-2 flex flex-wrap gap-4">
                   {['愿意', '暂不考虑'].map((v) => (
                     <label key={v} className="flex items-center gap-2 cursor-pointer">
@@ -380,7 +362,7 @@ function StreetFighterRegistration() {
                 </div>
               </fieldset>
               <fieldset>
-                <legend className="text-sm font-medium text-gray-800">7. 是否可语音</legend>
+                <legend className="text-sm font-medium text-gray-800">6. 是否可语音</legend>
                 <div className="mt-2 flex flex-wrap gap-4">
                   {['可以', '不方便'].map((v) => (
                     <label key={v} className="flex items-center gap-2 cursor-pointer">
@@ -397,16 +379,6 @@ function StreetFighterRegistration() {
                   ))}
                 </div>
               </fieldset>
-              <label className="block">
-                <span className="text-sm font-medium text-gray-800">8. 联系方式</span>
-                <input
-                  type="text"
-                  value={form.contact}
-                  onChange={(e) => setField('contact', e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-[#1E90FF] focus:ring-2 focus:ring-[#1E90FF]/20"
-                  placeholder="QQ / 微信等（注意隐私，可自行决定填写程度）"
-                />
-              </label>
             </div>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -434,10 +406,10 @@ function StreetFighterRegistration() {
                 <img src="/qq_logo.png" alt="QQ" className="w-8 h-8 mr-3 object-contain" />
                 <h3 className="text-xl font-bold">QQ 群报名</h3>
               </div>
-              <p className="mb-4 opacity-95">复制报名信息后，请发至群内或按群公告指引完成报名。</p>
+              <p className="mb-4 opacity-95">复制报名信息后，请先申请入群，之后发至群内或按群公告指引完成报名。</p>
               <div className="bg-white/20 rounded-lg p-4 backdrop-blur-sm">
                 <p className="text-sm opacity-90 mb-1">QQ 群号</p>
-                <p className="text-2xl font-mono font-bold">1077757525</p>
+                <p className="text-2xl font-mono font-bold">1004017180</p>
               </div>
             </div>
           </div>
