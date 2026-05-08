@@ -14,8 +14,8 @@ export const recentMatches = [
     title: '【街霸6】街霸杯',
     date: '2026年5月',
     description: '臭鱼烂虾首次街霸6比赛！',
-    status: '筹备中',
-    actionHref: '#',
+    status: '征集中',
+    actionHref: '/sf6-registration',
   },
 ];
 

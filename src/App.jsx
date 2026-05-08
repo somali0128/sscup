@@ -9,6 +9,7 @@ import SearchFunction from './components/SearchFunction';
 import About from './components/About';
 import Footer from './components/Footer';
 import MahjongCupRegistration from './components/MahjongCupRegistration';
+import StreetFighterRegistration from './components/StreetFighterRegistration';
 import { recentMatches, latestNews, leaderboardData, pastMatches } from './data/mockData';
 
 function HomePage() {
@@ -51,6 +52,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/mahjong-cup-registration" element={<MahjongCupRegistration />} />
+        <Route path="/sf6-registration" element={<StreetFighterRegistration />} />
       </Routes>
       <Footer />
     </div>
