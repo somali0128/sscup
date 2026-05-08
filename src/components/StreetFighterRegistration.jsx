@@ -86,7 +86,7 @@ function StreetFighterRegistration() {
   return (
     <div className="min-h-screen bg-gray-50">
       <section className="relative w-full h-56 md:h-72 overflow-hidden bg-gradient-to-br from-[#1a1a2e] via-[#4a0e0e] to-[#c45c26]">
-        <div className="absolute inset-0 opacity-30 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-400/40 via-transparent to-transparent" />
+        <div className="absolute inset-0 opacity-30 bg-[url('/sf6.png')] bg-cover bg-center bg-no-repeat" />
         <div className="absolute inset-0 flex items-center justify-center px-4">
           <div className="text-center text-white">
             <p className="text-sm md:text-base font-semibold text-amber-200/90 mb-2">街头霸王6</p>
@@ -245,7 +245,7 @@ function StreetFighterRegistration() {
             </h2>
 
             <div>
-              <h3 className="text-xl font-bold text-gray-800 mb-3">🏆 正式赛赛制</h3>
+              <h3 className="text-xl font-bold text-gray-800 mb-3">正式赛赛制</h3>
               <ul className="list-disc list-inside text-gray-700 space-y-2">
                 <li>除总决赛外均为 BO3</li>
                 <li>总决赛为 BO5</li>
@@ -255,7 +255,7 @@ function StreetFighterRegistration() {
             </div>
 
             <div>
-              <h3 className="text-xl font-bold text-gray-800 mb-3">🎭 师徒杯（娱乐赛）</h3>
+              <h3 className="text-xl font-bold text-gray-800 mb-3">师徒杯（娱乐赛）</h3>
               <p className="text-gray-700 mb-3">师徒杯为娱乐性质特别活动。</p>
               <p className="text-sm font-semibold text-gray-800 mb-2">目前暂定：</p>
               <ul className="list-disc list-inside text-gray-700 space-y-2 mb-4">
@@ -325,9 +325,9 @@ function StreetFighterRegistration() {
                 <legend className="text-sm font-medium text-gray-800">4. 报名组别</legend>
                 <div className="mt-2 space-y-2">
                   {[
-                    { value: '金属组（Bronze / Silver / Gold）', label: '🥉 金属组' },
-                    { value: '渡劫组（Platinum / Diamond）', label: '💎 渡劫组' },
-                    { value: '大师组（Master）', label: '👹 大师组' },
+                    { value: '金属组（Bronze / Silver / Gold）', label: '金属组' },
+                    { value: '渡劫组（Platinum / Diamond）', label: '渡劫组' },
+                    { value: '大师组（Master）', label: '大师组' },
                   ].map((opt) => (
                     <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
                       <input

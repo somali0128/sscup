@@ -1,4 +1,28 @@
 function Footer() {
+  const qqGroupNumber = '994272699';
+
+  const handleCopyQQGroup = async (event) => {
+    event.preventDefault();
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(qqGroupNumber);
+      } else {
+        const textArea = document.createElement('textarea');
+        textArea.value = qqGroupNumber;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+      }
+      window.alert('已复制群号');
+    } catch (error) {
+      window.alert('复制失败，请手动复制群号');
+    }
+  };
+
   return (
     <footer className="bg-gray-800 text-white py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -23,16 +47,19 @@ function Footer() {
             <h3 className="text-lg font-bold mb-4">社群链接</h3>
             <div className="space-y-2">
               <a
-                href="#"
+                href="https://oopz.cn/i/ja2cSH"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center text-gray-400 hover:text-[#FFA500] transition-colors"
               >
                 Oopz
               </a>
               <a
                 href="#"
+                onClick={handleCopyQQGroup}
                 className="flex items-center text-gray-400 hover:text-[#FFD700] transition-colors"
               >
-                QQ群: 994272699
+                QQ群: {qqGroupNumber}
               </a>
             </div>
           </div>
