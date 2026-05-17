@@ -12,33 +12,33 @@ export const recentMatches = [
   {
     id: 1,
     title: '【街霸6】街霸杯',
-    date: '2026年5月',
+    date: '2026年5月17日完赛',
     description: '臭鱼烂虾首次街霸6比赛！',
-    status: '征集中',
-    actionHref: '/sf6-registration',
+    status: '已完赛',
+    actionHref: 'https://www.bilibili.com/opus/1203199439810854920',
   },
 ];
 
 export const latestNews = [
   {
     id: 1,
+    date: '2026-05-17',
+    content: '【街霸6】街霸杯个人赛已圆满结束，恭喜老鞋子获得大师组获得冠军，神神气气羊教授获得渡劫组冠军，Luminous—T获得金属组冠军！ 另外感谢各位参赛选手的参与，期待下次比赛再会！',
+  },
+  {
+    id: 2,
     date: '2026-05-05',
     content: '【街霸6】街霸杯活动筹备中，敬请期待！',
   },
   {
-    id: 1,
+    id: 3,
     date: '2026-02-27',
     content: '【无畏契约】挑战者杯已于2026年2月27日完赛，感谢各位参与！',
   },
   {
-    id: 2,
+    id: 4,
     date: '2026-01-30',
     content: '【雀魂】雀神杯活动圆满结束！恭喜濑濑获得冠军！',
-  },
-  {
-    id: 3,
-    date: '2025-12-22',
-    content: '2026年初【雀魂】雀神杯活动筹备中，敬请期待！',
   },
 ];
 
@@ -46,48 +46,52 @@ export const leaderboardData = [
   { 
     id: 1, 
     name: '神神气气羊教授', 
-    score: 4900, 
+    score: 6400, 
     avatar: 'https://i0.hdslb.com/bfs/face/f424de93e57391eb8a71760263c403fb5e089dca.jpg@128w_128h_1c_1s.webp',
     bilibiliLink: '13793514',
     honorTags: [
       { name: '解说员', description: '曾担任比赛解说', rarity: 'purple' },
       { name: '夯', description: '在无畏契约赛前分组时被分配为夯水准', rarity: 'orange' },
-      { name: '国士无双', description: '在雀魂比赛中打出了国士无双', rarity: 'green' }
+      { name: '国士无双', description: '在雀魂比赛中打出了国士无双', rarity: 'green' },
+      { name: '渡劫组冠军', description: '在街霸6渡劫组比赛中获得冠军', rarity: 'orange' },
     ]
   },
   { 
     id: 2, 
     name: '季秋秋Autumn', 
-    score: 5700, 
-    avatar: 'https://i0.hdslb.com/bfs/face/1cec12fd3abb72479eed1d514aaa39d7a6c3be4b.jpg@128w_128h_1c_1s.webp',
+    score: 7200, 
+    avatar: 'https://i1.hdslb.com/bfs/face/4b792e140141da8efc13e24c333aad1678b031bb.jpg@128w_128h_1c_1s.webp',
     bilibiliLink: '376978534',
     honorTags: [
       { name: '全勤', description: '参与了目前所有活动', rarity: 'blue' },
-      { name: '奥丁神', description: '在挑战者杯中用奥丁1v3力克千钧', rarity: 'orange' }
+      { name: '奥丁神', description: '在挑战者杯中用奥丁1v3力克千钧', rarity: 'orange' },
+      { name: '金属组季军', description: '在街霸6金属组比赛中获得季军', rarity: 'blue' },
+      { name: '解说员', description: '曾担任比赛解说或主持', rarity: 'purple' },
     ]
   },
   { 
     id: 3, 
     name: '孤狼飞冰', 
-    score: 5500, 
+    score: 6800, 
     avatar: 'https://i0.hdslb.com/bfs/face/bdde5bbfd6ac183a7315af212c535cfdeae37fc8.jpg@128w_128h_1c_1s.webp',
     bilibiliLink: '1694579642',
     honorTags: [
       { name: '队长', description: '担任过任意一次队伍队长', rarity: 'green' },
       { name: '逆风翻盘', description: '在雀魂比赛中逆风翻盘', rarity: 'green' },
-      { name: '雀魂亚军', description: '在雀魂比赛中获得亚军', rarity: 'purple' }
+      { name: '雀魂亚军', description: '在雀魂比赛中获得亚军', rarity: 'purple' },
+      { name: '渡劫组亚军', description: '在街霸6渡劫组比赛中获得亚军', rarity: 'purple' },
     ]
   },
   { 
     id: 4, 
     name: '樾哥Soma', 
-    score: 5600, 
+    score: 6600, 
     avatar: 'https://i0.hdslb.com/bfs/face/c08d7214613a5b4938def0954da9b71b8f113d9f.jpg@128w_128h_1c_1s.webp',
     bilibiliLink: '290997685',
     honorTags: [
       { name: '全勤', description: '参与所有比赛，保持100%出勤率', rarity: 'blue' },
       { name: '队长', description: '担任过任意一次队伍队长', rarity: 'green' },
-      { name: '解说员', description: '曾担任比赛解说', rarity: 'purple' }
+      { name: '解说员', description: '曾担任比赛解说或主持', rarity: 'purple' }
     ]
   },
   { 
@@ -113,11 +117,12 @@ export const leaderboardData = [
   { 
     id: 7, 
     name: '殇', 
-    score: 2200, 
+    score: 3400, 
     avatar: '',
     bilibiliLink: '',
     honorTags: [
       { name: '双倍役满', description: '在雀魂比赛中打出了双倍役满', rarity: 'green' },
+      { name: '渡劫组季军', description: '在街霸6渡劫组比赛中获得季军', rarity: 'blue' },
     ]
   },
   { 
@@ -191,7 +196,7 @@ export const leaderboardData = [
   { 
     id: 15, 
     name: '皓白白_Aria', 
-    score: 1500, 
+    score: 2500, 
     avatar: 'https://i1.hdslb.com/bfs/face/5bec8a8daaca9eef4ec21720c5c5ce33db69b7ca.jpg@128w_128h_1c_1s.webp',
     bilibiliLink: '3546907785825016',
     honorTags: [
@@ -201,19 +206,21 @@ export const leaderboardData = [
   { 
     id: 16, 
     name: 'Luminous_T', 
-    score: 1000, 
+    score: 2500, 
     avatar: '',
     bilibiliLink: '',
     honorTags: [
+      { name: '金属组冠军', description: '在街霸6金属组比赛中获得冠军', rarity: 'orange' },
     ]
   },
   { 
     id: 17, 
     name: '三千', 
-    score: 1000, 
+    score: 2300, 
     avatar: '',
     bilibiliLink: '',
     honorTags: [
+      { name: '金属组亚军', description: '在街霸6金属组比赛中获得亚军', rarity: 'purple' },
     ]
   },
   { 
@@ -228,7 +235,7 @@ export const leaderboardData = [
   { 
     id: 19, 
     name: '白砂糖', 
-    score: 1100, 
+    score: 2100, 
     avatar: '',
     bilibiliLink: '',
     honorTags: [
@@ -305,5 +312,13 @@ export const pastMatches = [
     description: '臭鱼烂虾首次无畏契约3v5娱乐赛，于2月27日完赛。',
     quarter: '2026 Q1',
     resultLink: 'https://www.bilibili.com/video/BV1p5ABzMEtg/',
+  },
+  {
+    id: 6,
+    title: '【街霸6】街霸杯个人赛',
+    date: '2026-05-17',
+    description: '臭鱼烂虾首次街霸6个人赛，于5月17日完赛。',
+    quarter: '2026 Q2',
+    resultLink: 'https://www.bilibili.com/opus/1203199439810854920',
   },
 ];
