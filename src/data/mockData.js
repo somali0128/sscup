@@ -270,6 +270,45 @@ export const leaderboardData = [
     honorTags: [
     ]
   },
+  { 
+    id: 23, 
+    name: '老鞋子', 
+    score: 1500, 
+    avatar: '',
+    bilibiliLink: '',
+    honorTags: [
+      { name: '大师组冠军', description: '在街霸6大师组比赛中获得冠军', rarity: 'orange' },
+    ]
+  },
+  { 
+    id: 24, 
+    name: 'NoHappier', 
+    score: 1200, 
+    avatar: '',
+    bilibiliLink: '',
+    honorTags: [
+      { name: '大师组季军', description: '在街霸6大师组比赛中获得季军', rarity: 'blue' },
+    ]
+  },
+  { 
+    id: 25, 
+    name: 'Spark', 
+    score: 1300, 
+    avatar: '',
+    bilibiliLink: '',
+    honorTags: [
+      { name: '大师组亚军', description: '在街霸6大师组比赛中获得亚军', rarity: 'purple' },
+    ]
+  },
+  { 
+    id: 26, 
+    name: '水水回叫叫', 
+    score: 1000, 
+    avatar: '',
+    bilibiliLink: '',
+    honorTags: [
+    ]
+  },
 ];
 
 export const pastMatches = [
