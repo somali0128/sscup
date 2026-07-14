@@ -88,6 +88,17 @@ section[id] {
   padding-inline: clamp(1.5rem, 4vw, 4rem);
 }
 
+/* Leaderboard: a restrained champion spotlight */
+.leaderboard-champion {
+  animation: champion-breathe 5.5s ease-in-out infinite;
+  will-change: transform, box-shadow;
+}
+
+.champion-medal {
+  animation: champion-medal 5.5s ease-in-out infinite;
+  transform-origin: center;
+}
+
 @keyframes hero-float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
@@ -98,13 +109,31 @@ section[id] {
   to { transform: translate3d(-50%, 0, 0); }
 }
 
+@keyframes champion-breathe {
+  0%, 100% {
+    transform: translateY(0);
+    box-shadow: 0 24px 55px rgba(211, 164, 24, 0.16);
+  }
+  50% {
+    transform: translateY(-5px);
+    box-shadow: 0 30px 65px rgba(211, 164, 24, 0.26);
+  }
+}
+
+@keyframes champion-medal {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
 
   .hero-float,
-  .hero-marquee-track {
+  .hero-marquee-track,
+  .leaderboard-champion,
+  .champion-medal {
     animation: none;
   }
 }
