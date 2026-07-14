@@ -11,7 +11,8 @@ import Footer from './components/Footer';
 import MahjongCupRegistration from './components/MahjongCupRegistration';
 import StreetFighterRegistration from './components/StreetFighterRegistration';
 
-const API_BASE_URL = import.meta.env.VITE_SOMA_API_URL || 'https://api.sticksoma.art';
+const API_BASE_URL = import.meta.env.VITE_SOMA_API_URL ||
+  (import.meta.env.DEV ? '' : 'https://api.sticksoma.art');
 
 function HomePage() {
   const location = useLocation();
@@ -55,7 +56,10 @@ function HomePage() {
 
   return (
     <>
-      <Hero />
+      <Hero
+        matches={clubData?.recentMatches}
+        isLoading={!clubData && !loadError}
+      />
       {!clubData && !loadError && (
         <div className="py-16 text-center text-gray-500" role="status">正在加载俱乐部数据…</div>
       )}

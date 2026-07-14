@@ -2,13 +2,19 @@ import { useState, useEffect, useMemo } from 'react';
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
 
+const INITIAL_VISIBLE_COUNT = 10;
+
 function Leaderboard({ players }) {
   const [displayedScores, setDisplayedScores] = useState({});
+  const [showAll, setShowAll] = useState(false);
 
   // 按分数从高到低排序
   const sortedPlayers = useMemo(() => {
     return [...players].sort((a, b) => b.score - a.score);
   }, [players]);
+  const visiblePlayers = showAll
+    ? sortedPlayers
+    : sortedPlayers.slice(0, INITIAL_VISIBLE_COUNT);
 
   // 处理B站图片URL，如果referrerPolicy不够，可以使用代理
   const getImageUrl = (url) => {
@@ -49,15 +55,15 @@ function Leaderboard({ players }) {
     return `#${rank}`;
   };
 
-  const getRankColor = (rank) => {
+  const getRankColor = () => {
     return 'bg-white';
   };
 
-  const getTextColor = (rank) => {
+  const getTextColor = () => {
     return 'text-gray-800';
   };
 
-  const getSecondaryTextColor = (rank) => {
+  const getSecondaryTextColor = () => {
     return 'text-gray-600';
   };
 
@@ -72,7 +78,7 @@ function Leaderboard({ players }) {
     return 'border-gray-200';
   };
 
-  const getHonorTagStyle = (rank, rarity) => {
+  const getHonorTagStyle = (rarity) => {
     // 稀有度颜色映射
     const rarityColors = {
       orange: {
@@ -127,15 +133,15 @@ function Leaderboard({ players }) {
           </Tippy>
         </div>
         
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sortedPlayers.map((player, index) => {
+        <div id="leaderboard-players" className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {visiblePlayers.map((player, index) => {
             const rank = index + 1;
             const displayedScore = displayedScores[player.id] || 0;
             
             return (
               <div
                 key={player.id}
-                className={`${getRankColor(rank)} border-8 ${getBorderColor(rank)} rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2`}
+                className={`${getRankColor()} border-8 ${getBorderColor(rank)} rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2`}
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center">
@@ -153,19 +159,19 @@ function Leaderboard({ players }) {
                             const parent = e.target.parentElement;
                             if (parent && !parent.querySelector('span')) {
                               const fallback = document.createElement('span');
-                              fallback.className = `text-2xl ${getTextColor(rank)}`;
+                              fallback.className = `text-2xl ${getTextColor()}`;
                               fallback.textContent = player.name.charAt(0);
                               parent.appendChild(fallback);
                             }
                           }}
                         />
                       ) : (
-                        <span className={`text-2xl ${getTextColor(rank)}`}>{player.name.charAt(0)}</span>
+                        <span className={`text-2xl ${getTextColor()}`}>{player.name.charAt(0)}</span>
                       )}
                     </div>
                     <div>
-                      <h3 className={`text-lg font-bold ${getTextColor(rank)}`}>{player.name}</h3>
-                      <p className={`text-sm ${getSecondaryTextColor(rank)}`}>排名 {rank}</p>
+                      <h3 className={`text-lg font-bold ${getTextColor()}`}>{player.name}</h3>
+                      <p className={`text-sm ${getSecondaryTextColor()}`}>排名 {rank}</p>
                     </div>
                   </div>
                   <div className="text-3xl">{getRankIcon(rank)}</div>
@@ -173,7 +179,7 @@ function Leaderboard({ players }) {
                 
                 <div className={`mt-4 pt-4 border-t ${getDividerColor()}`}>
                   <div className="flex justify-between items-center mb-3">
-                    <span className={getSecondaryTextColor(rank)}>活跃分数</span>
+                    <span className={getSecondaryTextColor()}>活跃分数</span>
                     <span className="text-2xl font-bold text-[#1E90FF]">
                       {displayedScore.toLocaleString()}
                     </span>
@@ -190,7 +196,7 @@ function Leaderboard({ players }) {
                         
                         const tagContent = (
                           <span
-                            className={`${getHonorTagStyle(rank, tagRarity)} cursor-help`}
+                            className={`${getHonorTagStyle(tagRarity)} cursor-help`}
                           >
                             {tagName}
                           </span>
@@ -234,6 +240,29 @@ function Leaderboard({ players }) {
             );
           })}
         </div>
+
+        {sortedPlayers.length > INITIAL_VISIBLE_COUNT && (
+          <div className="mt-10 flex justify-center">
+            <button
+              type="button"
+              aria-controls="leaderboard-players"
+              aria-expanded={showAll}
+              onClick={() => setShowAll((current) => !current)}
+              className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#1E90FF]/20 bg-[#1E90FF]/10 px-7 py-3 font-bold text-[#1873CC] transition hover:-translate-y-0.5 hover:border-[#1E90FF]/35 hover:bg-[#1E90FF] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1E90FF]"
+            >
+              {showAll ? '收起排行榜' : '展开更多'}
+              <svg
+                aria-hidden="true"
+                className={`h-5 w-5 transition-transform duration-300 ${showAll ? 'rotate-180' : ''}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );
