@@ -1,5 +1,5 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import RecentMatches from './components/RecentMatches';
@@ -10,10 +10,30 @@ import About from './components/About';
 import Footer from './components/Footer';
 import MahjongCupRegistration from './components/MahjongCupRegistration';
 import StreetFighterRegistration from './components/StreetFighterRegistration';
-import { recentMatches, latestNews, leaderboardData, pastMatches } from './data/mockData';
+
+const API_BASE_URL = import.meta.env.VITE_SOMA_API_URL || 'https://api.sticksoma.art';
 
 function HomePage() {
   const location = useLocation();
+  const [clubData, setClubData] = useState(null);
+  const [loadError, setLoadError] = useState(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch(`${API_BASE_URL}/api/sscup`, { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error(`API returned ${response.status}`);
+        return response.json();
+      })
+      .then((payload) => {
+        setClubData(payload.data);
+        setLoadError(false);
+      })
+      .catch((error) => {
+        if (error.name !== 'AbortError') setLoadError(true);
+      });
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     // 处理从其他页面跳转过来带 hash 的情况
@@ -36,9 +56,21 @@ function HomePage() {
   return (
     <>
       <Hero />
-      <RecentMatches matches={recentMatches} news={latestNews} />
-      <Leaderboard players={leaderboardData} />
-      <PastMatches pastMatches={pastMatches} />
+      {!clubData && !loadError && (
+        <div className="py-16 text-center text-gray-500" role="status">正在加载俱乐部数据…</div>
+      )}
+      {loadError && (
+        <div className="mx-auto my-12 max-w-3xl rounded-xl border border-red-200 bg-red-50 px-6 py-5 text-center text-red-700" role="alert">
+          俱乐部数据暂时无法加载，请稍后刷新页面。
+        </div>
+      )}
+      {clubData && (
+        <>
+          <RecentMatches matches={clubData.recentMatches} news={clubData.news} />
+          <Leaderboard players={clubData.players} />
+          <PastMatches pastMatches={clubData.pastMatches} />
+        </>
+      )}
       {/* <SearchFunction /> */}
       <About />
     </>
