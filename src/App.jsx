@@ -57,7 +57,7 @@ function HomePage() {
   return (
     <>
       <Hero
-        matches={clubData?.recentMatches}
+        matches={clubData?.pastMatches}
         isLoading={!clubData && !loadError}
       />
       {!clubData && !loadError && (

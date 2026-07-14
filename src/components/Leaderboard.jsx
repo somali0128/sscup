@@ -67,12 +67,10 @@ function PlayerAvatar({ player, className = 'h-16 w-16', ringClass = 'ring-gray-
   );
 }
 
-function HonorTags({ tags = [], limit }) {
-  const visibleTags = typeof limit === 'number' ? tags.slice(0, limit) : tags;
-
+function HonorTags({ tags = [], align = 'center' }) {
   return (
-    <div className="flex flex-wrap justify-center gap-2">
-      {visibleTags.map((tag, index) => {
+    <div className={`flex flex-wrap gap-2 ${align === 'start' ? 'justify-start' : 'justify-center'}`}>
+      {tags.map((tag, index) => {
         const name = typeof tag === 'string' ? tag : tag.name;
         const description = typeof tag === 'string' ? '' : tag.description;
         const rarity = typeof tag === 'object' ? tag.rarity : null;
@@ -114,16 +112,12 @@ function ScoreDisplay({ player, displayedScore, maxScore, prominent = false }) {
           style={{ width: `${percentage}%` }}
         />
       </div>
-      {breakdown.length > 0 ? (
+      {breakdown.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
           {breakdown.map(([key, value]) => (
             <span key={key}>{scoreLabels[key] || key} <b className="text-slate-700">+{value.toLocaleString()}</b></span>
           ))}
         </div>
-      ) : (
-        <p className="mt-3 text-xs text-slate-500">
-          参赛基础分 <span className="mx-1 text-[#1E90FF]">+</span> 荣誉加成
-        </p>
       )}
     </div>
   );
@@ -178,7 +172,7 @@ function PodiumCard({ player, rank, displayedScore, maxScore }) {
       </div>
 
       <div className="relative mt-5 flex flex-1 flex-col items-center justify-between gap-5">
-        <HonorTags tags={player.honorTags} limit={isChampion ? 4 : 3} />
+        <HonorTags tags={player.honorTags} />
         <BilibiliLink player={player} />
       </div>
     </article>
@@ -193,14 +187,16 @@ function RankingCard({ player, rank, displayedScore, maxScore }) {
         <PlayerAvatar player={player} className="h-14 w-14" />
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-lg font-bold text-slate-800">{player.name}</h3>
-          <p className="mt-1 truncate text-xs text-slate-500">
-            {player.honorTags?.[0]
-              ? (typeof player.honorTags[0] === 'string' ? player.honorTags[0] : player.honorTags[0].name)
-              : '持续活跃中'}
-          </p>
+          <p className="mt-1 text-xs text-slate-500">排名 {rank}</p>
         </div>
         <BilibiliLink player={player} compact />
       </div>
+      {player.honorTags && player.honorTags.length > 0 && (
+        <div className="mt-4 border-t border-slate-100 pt-4">
+          <p className="mb-2 text-xs font-semibold text-slate-500">荣誉成就</p>
+          <HonorTags tags={player.honorTags} align="start" />
+        </div>
+      )}
       <div className="mt-4 border-t border-slate-100 pt-4">
         <ScoreDisplay player={player} displayedScore={displayedScore} maxScore={maxScore} />
       </div>
@@ -263,12 +259,29 @@ function Leaderboard({ players }) {
         </div>
 
         {showScoreRules && (
-          <div id="score-rules" className="mt-6 grid gap-3 rounded-2xl border border-[#1E90FF]/15 bg-[#eef7ff] p-5 text-sm text-slate-600 md:grid-cols-[1fr_auto_1fr_auto_1fr] md:items-center">
-            <div><b className="block text-slate-900">参与活动</b><span>获得每场比赛的基础积分</span></div>
+          <div id="score-rules" className="mt-6 grid gap-5 rounded-2xl border border-[#1E90FF]/15 bg-[#eef7ff] p-5 text-sm text-slate-600 md:grid-cols-[0.75fr_auto_1.5fr_auto_0.75fr] md:items-center">
+            <div>
+              <b className="block text-slate-900">参与活动</b>
+              <strong className="mt-1 block text-xl text-[#147fe6]">+1,000 分</strong>
+              <span className="mt-1 block text-xs">每参与一场活动</span>
+            </div>
             <span className="hidden text-xl font-black text-[#1E90FF] md:block">+</span>
-            <div><b className="block text-slate-900">荣誉成就</b><span>按标签稀有度获得额外加成</span></div>
+            <div>
+              <b className="block text-slate-900">荣誉成就</b>
+              <div className="mt-2 flex flex-wrap gap-2 text-xs font-bold">
+                <span className="rounded-full bg-amber-400 px-2.5 py-1 text-amber-950">金 +500</span>
+                <span className="rounded-full bg-purple-500 px-2.5 py-1 text-white">紫 +300</span>
+                <span className="rounded-full bg-blue-500 px-2.5 py-1 text-white">蓝 +200</span>
+                <span className="rounded-full bg-green-500 px-2.5 py-1 text-white">绿 +100</span>
+              </div>
+              <span className="mt-2 block text-xs">每枚荣誉标签按稀有度加分</span>
+            </div>
             <span className="hidden text-xl font-black text-[#1E90FF] md:block">=</span>
-            <div><b className="block text-slate-900">活跃分</b><span>所有积分累计后的排行榜总分</span></div>
+            <div>
+              <b className="block text-slate-900">活跃分</b>
+              <strong className="mt-1 block text-xl text-[#147fe6]">累计总分</strong>
+              <span className="mt-1 block text-xs">用于排行榜排序</span>
+            </div>
           </div>
         )}
 

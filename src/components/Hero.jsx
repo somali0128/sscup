@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 const communityGames = ['街霸 6', '雀魂', '无畏契约', '玩家社区'];
 
 const getMatchArtwork = (title = '') => {
@@ -31,6 +33,12 @@ const getStatusStyle = (status) => {
   return 'border-[#66f5d1]/40 bg-[#66f5d1]/15 text-[#8fffe4]';
 };
 
+const formatMatchDate = (date) => {
+  const parts = date?.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!parts) return date || '下一场，等你来战';
+  return `${parts[1]}年${Number(parts[2])}月${Number(parts[3])}日完赛`;
+};
+
 function ArrowIcon() {
   return (
     <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -39,14 +47,146 @@ function ArrowIcon() {
   );
 }
 
-function Hero({ matches = [], isLoading = false }) {
-  const featuredMatch =
-    matches.find((match) => match.status === '征集中') ||
-    matches.find((match) => match.status === '筹备中') ||
-    matches[0];
-  const action = getMatchAction(featuredMatch);
-  const artwork = getMatchArtwork(featuredMatch?.title);
+function ChevronIcon({ direction = 'next' }) {
+  return (
+    <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2.25"
+        d={direction === 'previous' ? 'm15 18-6-6 6-6' : 'm9 6 6 6-6 6'}
+      />
+    </svg>
+  );
+}
+
+function MatchCard({
+  match,
+  isLoading,
+  matchIndex,
+  matchCount,
+  onChangeMatch,
+  isActive,
+  position,
+  isOutgoing,
+  onShuffleEnd,
+}) {
+  const action = getMatchAction(match);
+  const artwork = getMatchArtwork(match?.title);
   const isExternal = /^https?:\/\//i.test(action.href);
+  const hasMultipleMatches = matchCount > 1;
+
+  return (
+    <article
+      aria-hidden={!isActive}
+      data-stack-position={position}
+      onAnimationEnd={(event) => {
+        if (
+          isOutgoing &&
+          event.target === event.currentTarget &&
+          event.animationName === 'hero-card-to-back'
+        ) {
+          onShuffleEnd();
+        }
+      }}
+      className={`hero-stack-card overflow-hidden rounded-[1.75rem] border border-white/15 bg-[#0d2437]/90 shadow-[0_35px_100px_rgba(0,0,0,0.45)] backdrop-blur-xl ${isOutgoing ? 'hero-stack-card-outgoing' : ''}`}
+    >
+      <div className="relative h-52 overflow-hidden sm:h-64">
+        {artwork ? (
+          <img
+            src={artwork}
+            alt=""
+            className="h-full w-full object-cover opacity-85"
+          />
+        ) : (
+          <div className="h-full w-full bg-[linear-gradient(135deg,#1376ff_0%,#0a3654_50%,#00b99a_100%)]" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0d2437] via-[#0d2437]/20 to-transparent" />
+        <div aria-hidden="true" className="absolute -right-10 -top-8 text-[9rem] font-black leading-none text-white/[0.08] sm:text-[12rem]">S&amp;S</div>
+        <div className="absolute left-5 top-5 flex items-center gap-2 rounded-full border border-white/15 bg-[#071827]/75 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] backdrop-blur-md">
+          {isLoading ? '同步赛场情报' : 'Featured match'}
+        </div>
+
+        {hasMultipleMatches && isActive && (
+          <div className="absolute right-4 top-4 flex items-center gap-1 rounded-full border border-white/15 bg-[#071827]/70 p-1 text-white shadow-lg backdrop-blur-md">
+            <span className="min-w-12 text-center font-mono text-[11px] tracking-wider text-slate-200">
+              {String(matchIndex + 1).padStart(2, '0')} / {String(matchCount).padStart(2, '0')}
+            </span>
+            <button
+              type="button"
+              aria-label="下一场赛事"
+              onClick={onChangeMatch}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-[#ffdc55]"
+            >
+              <ChevronIcon />
+            </button>
+          </div>
+        )}
+
+        <img
+          src="/sscup.png"
+          alt="S&S Cup Logo"
+          className="absolute bottom-3 right-4 h-20 w-20 object-contain drop-shadow-2xl sm:h-24 sm:w-24"
+        />
+      </div>
+
+      <div className="relative p-5 sm:p-7">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className={`rounded-full border px-3 py-1 text-xs font-bold tracking-wide ${getStatusStyle(match?.status)}`}>
+            {isLoading ? '数据同步中' : match?.status || '新赛程筹备中'}
+          </span>
+          <span className="text-sm text-slate-400">{formatMatchDate(match?.date)}</span>
+        </div>
+        <h2 className="mt-5 text-2xl font-black tracking-tight sm:text-3xl">
+          {match?.title || '下一场比赛正在筹备'}
+        </h2>
+        <p className="mt-3 min-h-12 text-sm leading-6 text-slate-300 sm:text-base">
+          {match?.description || '关注赛事动态，选择你擅长的游戏，和新老朋友一起上场。'}
+        </p>
+        <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
+          <span className="font-mono text-xs uppercase tracking-[0.2em] text-[#66f5d1]">Play · Meet · Enjoy</span>
+          <a
+            href={action.href}
+            target={isExternal ? '_blank' : undefined}
+            rel={isExternal ? 'noopener noreferrer' : undefined}
+            tabIndex={isActive ? 0 : -1}
+            aria-label={`${action.label}：${match?.title || '近期赛事'}`}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 transition hover:border-[#ffdc55] hover:bg-[#ffdc55] hover:text-[#091722] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ffdc55]"
+          >
+            <ArrowIcon />
+          </a>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function Hero({ matches = [], isLoading = false }) {
+  const orderedMatches = [...matches]
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 3)
+    .map((match) => ({
+      ...match,
+      status: match.status || '已完赛',
+      actionHref: match.actionHref || match.resultLink,
+    }));
+  const matchCount = orderedMatches.length;
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isShuffling, setIsShuffling] = useState(false);
+  const safeActiveIndex = matchCount ? activeIndex % matchCount : 0;
+  const featuredMatch = orderedMatches[safeActiveIndex];
+  const action = getMatchAction(featuredMatch);
+  const isExternal = /^https?:\/\//i.test(action.href);
+
+  const shuffleToNextMatch = () => {
+    if (matchCount < 2 || isShuffling) return;
+    setIsShuffling(true);
+  };
+
+  const finishShuffle = () => {
+    setActiveIndex((index) => (index + 1) % Math.max(matchCount, 1));
+    setIsShuffling(false);
+  };
 
   return (
     <section
@@ -104,55 +244,28 @@ function Hero({ matches = [], isLoading = false }) {
 
         <div className="relative mx-auto w-full max-w-[34rem] lg:mx-0 lg:justify-self-end">
           <div aria-hidden="true" className="absolute -inset-5 rotate-3 rounded-[2rem] border border-[#66f5d1]/20 bg-[#66f5d1]/5" />
-          <div className="hero-float relative overflow-hidden rounded-[1.75rem] border border-white/15 bg-[#0d2437]/90 shadow-[0_35px_100px_rgba(0,0,0,0.45)] backdrop-blur-xl">
-            <div className="relative h-52 overflow-hidden sm:h-64">
-              {artwork ? (
-                <img
-                  src={artwork}
-                  alt=""
-                  className="h-full w-full object-cover opacity-85"
-                />
-              ) : (
-                <div className="h-full w-full bg-[linear-gradient(135deg,#1376ff_0%,#0a3654_50%,#00b99a_100%)]" />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0d2437] via-[#0d2437]/20 to-transparent" />
-              <div aria-hidden="true" className="absolute -right-10 -top-8 text-[9rem] font-black leading-none text-white/[0.08] sm:text-[12rem]">S&amp;S</div>
-              <div className="absolute left-5 top-5 flex items-center gap-2 rounded-full border border-white/15 bg-[#071827]/75 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] backdrop-blur-md">
-                {isLoading ? '同步赛场情报' : 'Featured match'}
-              </div>
-              <img
-                src="/sscup.png"
-                alt="S&S Cup Logo"
-                className="absolute bottom-3 right-4 h-20 w-20 object-contain drop-shadow-2xl sm:h-24 sm:w-24"
-              />
-            </div>
+          <div className="hero-float hero-stack-scene relative h-[32.5rem] w-[calc(100%-1.25rem)] sm:h-[35.5rem]">
+            {(matchCount ? orderedMatches : [null]).map((match, index) => {
+              const position = matchCount
+                ? (index - safeActiveIndex + matchCount) % matchCount
+                : 0;
+              const displayPosition = isShuffling && position > 0 ? position - 1 : position;
 
-            <div className="relative p-5 sm:p-7">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <span className={`rounded-full border px-3 py-1 text-xs font-bold tracking-wide ${getStatusStyle(featuredMatch?.status)}`}>
-                  {isLoading ? '数据同步中' : featuredMatch?.status || '新赛程筹备中'}
-                </span>
-                <span className="text-sm text-slate-400">{featuredMatch?.date || '下一场，等你来战'}</span>
-              </div>
-              <h2 className="mt-5 text-2xl font-black tracking-tight sm:text-3xl">
-                {featuredMatch?.title || '下一场比赛正在筹备'}
-              </h2>
-              <p className="mt-3 min-h-12 text-sm leading-6 text-slate-300 sm:text-base">
-                {featuredMatch?.description || '关注赛事动态，选择你擅长的游戏，和新老朋友一起上场。'}
-              </p>
-              <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
-                <span className="font-mono text-xs uppercase tracking-[0.2em] text-[#66f5d1]">Play · Meet · Enjoy</span>
-                <a
-                  href={action.href}
-                  target={isExternal ? '_blank' : undefined}
-                  rel={isExternal ? 'noopener noreferrer' : undefined}
-                  aria-label={`${action.label}：${featuredMatch?.title || '近期赛事'}`}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 transition hover:border-[#ffdc55] hover:bg-[#ffdc55] hover:text-[#091722] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ffdc55]"
-                >
-                  <ArrowIcon />
-                </a>
-              </div>
-            </div>
+              return (
+                <MatchCard
+                  key={match?.id || 'loading-match'}
+                  match={match}
+                  isLoading={isLoading}
+                  isActive={position === 0}
+                  isOutgoing={isShuffling && position === 0}
+                  position={displayPosition}
+                  matchIndex={index}
+                  matchCount={matchCount}
+                  onChangeMatch={shuffleToNextMatch}
+                  onShuffleEnd={finishShuffle}
+                />
+              );
+            })}
           </div>
         </div>
       </div>
