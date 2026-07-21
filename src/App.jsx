@@ -10,6 +10,7 @@ import About from './components/About';
 import Footer from './components/Footer';
 import MahjongCupRegistration from './components/MahjongCupRegistration';
 import StreetFighterRegistration from './components/StreetFighterRegistration';
+import LimitedDropPage from './components/LimitedDropPage';
 
 const API_BASE_URL = import.meta.env.VITE_SOMA_API_URL ||
   (import.meta.env.DEV ? '' : 'https://api.sticksoma.art');
@@ -81,7 +82,7 @@ function HomePage() {
   );
 }
 
-function App() {
+function MainSite() {
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -92,6 +93,15 @@ function App() {
       </Routes>
       <Footer />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/event/limited-drop" element={<LimitedDropPage />} />
+      <Route path="*" element={<MainSite />} />
+    </Routes>
   );
 }
 
