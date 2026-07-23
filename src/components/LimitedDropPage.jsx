@@ -12,7 +12,7 @@ const productDetails = [
   ['系列款式', '6 款常规款 + 1 款隐藏款'],
   ['单盒内容', '随机角色公仔 × 1、角色卡 × 1'],
   ['公仔尺寸', '高度约 70–85 mm'],
-  ['商品材质', 'PVC / ABS'],
+  ['商品材质', '粘土'],
   ['隐藏概率', '常规系列中约 1 : 72'],
   ['售后说明', '盲盒拆封后非质量问题不支持退换'],
 ];
@@ -39,8 +39,8 @@ function LimitedDropPage() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = 'S&S CUP 惊喜角色盲盒';
-    return () => { document.title = '臭鱼烂虾杯'; };
+    document.title = '好友礼盒之：樾哥&毛毛系列';
+    return () => { document.title = '好友礼盒'; };
   }, []);
 
   const selectPrevious = () => setActiveImage((current) => (current - 1 + productImages.length) % productImages.length);
@@ -53,8 +53,7 @@ function LimitedDropPage() {
       </div>
 
       <header className="border-b-2 border-[#27304d] bg-white/85 backdrop-blur">
-        <div className="mx-auto flex h-20 max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:px-12">
-          <a href="/event/limited-drop" className="rotate-[-2deg] rounded-full border-2 border-[#27304d] bg-[#79ddf2] px-4 py-2 text-sm font-black shadow-[3px_3px_0_#27304d]">S&amp;S 惊喜商店</a>
+        <div className="mx-auto flex h-20 max-w-[1440px] items-center justify-end px-5 sm:px-8 lg:px-12">
           <div className="flex items-center gap-5 text-[10px] font-bold uppercase tracking-[0.18em]">
             <span className="hidden text-[#637092] sm:inline">Series 01 · Mystery friends</span>
             <span className="flex items-center gap-2 rounded-full bg-[#ffdb69] px-3 py-2"><BagIcon /> 购物袋 (0)</span>
@@ -105,25 +104,25 @@ function LimitedDropPage() {
           <section className="px-5 py-10 sm:px-8 sm:py-14 lg:px-12 lg:py-16">
             <div className="mx-auto max-w-xl">
               <div className="flex items-center justify-between gap-5 border-b-2 border-[#27304d]/15 pb-5">
-                <span className="rotate-[-2deg] rounded-full border-2 border-[#27304d] bg-[#ff8eb0] px-3 py-1.5 text-[10px] font-black tracking-[0.15em] text-white shadow-[2px_2px_0_#27304d]">LIMITED · SOLD OUT</span>
-                <span className="font-mono text-[10px] tracking-[0.16em] text-[#637092]">SKU SS-BLIND-001</span>
+                <span className="rotate-[-2deg] rounded-full border-2 border-[#27304d] bg-[#ff8eb0] px-3 py-1.5 text-[10px] font-black tracking-[0.15em] text-white shadow-[2px_2px_0_#27304d]">限量定制</span>
+                <span className="font-mono text-[10px] tracking-[0.16em] text-[#637092]">SKU YM-BLIND-001</span>
               </div>
 
-              <h1 className="mt-9 text-[clamp(2.7rem,5vw,4.8rem)] font-black leading-[0.93] tracking-[-0.06em] text-[#27304d]">
-                Surprise Friends<br /><span className="text-[#ff5f88]">Mystery Box!</span>
+              <h1 className="mt-9 text-[clamp(2.7rem,5vw,4.8rem)] font-black leading-[0.98] tracking-[-0.06em] text-[#27304d]">
+                好友礼盒之：<br /><span className="text-[#ff5f88]">樾哥&amp;毛毛系列</span>
               </h1>
-              <p className="mt-5 text-sm font-black tracking-[0.12em] text-[#637092]">S&amp;S CUP 惊喜角色盲盒 · 第一弹</p>
+              <p className="mt-5 text-sm font-black tracking-[0.12em] text-[#637092]">第一弹</p>
 
               <div className="mt-10 flex items-end justify-between border-y border-black/15 py-6">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-black/45">Final price</p>
-                  <p className="mt-2 text-3xl font-black tracking-tight">¥ 59.90 <span className="text-sm text-[#637092]">/ 盒</span></p>
+                  <p className="mt-2 text-3xl font-black tracking-tight">￥ 399.90</p>
                 </div>
                 <span className="rotate-2 rounded-full border-2 border-[#27304d] bg-[#ffdb69] px-4 py-2 text-xs font-black tracking-[0.12em] shadow-[3px_3px_0_#27304d]">售罄啦!</span>
               </div>
 
               <p className="mt-8 text-sm leading-7 text-black/65">
-                谁躲在盒子里？拆开才知道！六位臭鱼烂虾小伙伴带着各自的小道具前来集合，还有一位神秘隐藏朋友悄悄混在其中。每盒都是随机惊喜，本系列售完不补。
+                谁躲在盒子里？拆开才知道！樾哥和毛毛带着各自的小道具前来集合，还有一位神秘隐藏朋友悄悄混在其中。每盒都是随机惊喜，本系列售完不补。
               </p>
 
               <div className="mt-8 rounded-3xl border-2 border-[#27304d] bg-[#bdeff7] p-5 shadow-[5px_5px_0_#27304d]">
@@ -207,7 +206,7 @@ function LimitedDropPage() {
 
       <footer className="border-t-2 border-[#27304d] bg-[#79ddf2] px-5 py-8 text-[#27304d] sm:px-8 lg:px-12">
         <div className="mx-auto flex max-w-[1440px] flex-col gap-4 text-[10px] font-bold uppercase tracking-[0.18em] sm:flex-row sm:items-center sm:justify-between">
-          <span>© 2026 S&amp;S Surprise Shop</span>
+          <span>© 2026 好友礼盒</span>
           <span className="text-[#637092]">今天也要开心拆盒!</span>
         </div>
       </footer>
