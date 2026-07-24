@@ -47,7 +47,7 @@ function LimitedDropPage() {
   const selectNext = () => setActiveImage((current) => (current + 1) % productImages.length);
 
   return (
-    <div className="min-h-screen bg-[#fff7cf] font-[Arial,'Helvetica_Neue',sans-serif] text-[#27304d]">
+    <div className="blind-box-font min-h-screen bg-[#fff7cf] text-[#27304d]">
       <div className="border-b-2 border-[#27304d] bg-[#ff6f91] px-4 py-2.5 text-center text-[11px] font-black tracking-[0.16em] text-white">
         ✦ 限定惊喜掉落 · 全部售罄啦 · 感谢大家喜欢 ✦
       </div>
@@ -64,7 +64,7 @@ function LimitedDropPage() {
       <main>
         <div className="mx-auto grid max-w-[1440px] lg:grid-cols-[minmax(0,1.12fr)_minmax(25rem,0.88fr)]">
           <section className="border-b-2 border-[#27304d] lg:border-b-0 lg:border-r-2" aria-label="商品图片">
-            <div className="relative aspect-[4/4.5] overflow-hidden bg-[#bfeef7] sm:aspect-[4/3.7] lg:sticky lg:top-0 lg:aspect-auto lg:h-[calc(100vh-7rem)] lg:min-h-[44rem]">
+            <div className="relative aspect-[4/4.5] overflow-hidden bg-[#bfeef7] sm:aspect-[4/3.7] lg:aspect-[4/4.2]">
               {productImages.map((image, index) => (
                 <img
                   key={image.src}
@@ -108,7 +108,7 @@ function LimitedDropPage() {
                 <span className="font-mono text-[10px] tracking-[0.16em] text-[#637092]">SKU YM-BLIND-001</span>
               </div>
 
-              <h1 className="mt-9 text-[clamp(2.7rem,5vw,4.8rem)] font-black leading-[0.98] tracking-[-0.06em] text-[#27304d]">
+              <h1 className="mt-9 text-[clamp(2.2rem,4.2vw,3.8rem)] font-black leading-[1.12] tracking-[-0.03em] text-[#27304d]">
                 好友礼盒之：<br /><span className="text-[#ff5f88]">樾哥&amp;毛毛系列</span>
               </h1>
               <p className="mt-5 text-sm font-black tracking-[0.12em] text-[#637092]">第一弹</p>
