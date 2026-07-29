@@ -14,28 +14,63 @@ import LimitedDropPage from './components/LimitedDropPage';
 
 const API_BASE_URL = import.meta.env.VITE_SOMA_API_URL ||
   (import.meta.env.DEV ? '' : 'https://api.sticksoma.art');
+const CLUB_DATA_TIMEOUT_MS = 12_000;
 
 function HomePage() {
   const location = useLocation();
   const [clubData, setClubData] = useState(null);
-  const [loadError, setLoadError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch(`${API_BASE_URL}/api/sscup`, { signal: controller.signal })
-      .then((response) => {
+    let isCurrentRequest = true;
+    let didTimeout = false;
+    const timeoutId = window.setTimeout(() => {
+      didTimeout = true;
+      controller.abort();
+    }, CLUB_DATA_TIMEOUT_MS);
+
+    async function loadClubData() {
+      setIsLoading(true);
+      setLoadError('');
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/sscup`, {
+          signal: controller.signal,
+          cache: 'no-store',
+        });
         if (!response.ok) throw new Error(`API returned ${response.status}`);
-        return response.json();
-      })
-      .then((payload) => {
-        setClubData(payload.data);
-        setLoadError(false);
-      })
-      .catch((error) => {
-        if (error.name !== 'AbortError') setLoadError(true);
-      });
-    return () => controller.abort();
-  }, []);
+        const payload = await response.json();
+
+        if (!payload?.data || typeof payload.data !== 'object') {
+          throw new Error('API returned invalid club data');
+        }
+
+        if (isCurrentRequest) setClubData(payload.data);
+      } catch {
+        if (isCurrentRequest) {
+          setLoadError(
+            didTimeout
+              ? '俱乐部数据请求超时，请稍后重试。'
+              : '俱乐部数据暂时无法加载，请稍后重试。',
+          );
+        }
+      } finally {
+        if (isCurrentRequest) setIsLoading(false);
+        window.clearTimeout(timeoutId);
+      }
+    }
+
+    loadClubData();
+
+    return () => {
+      isCurrentRequest = false;
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [reloadKey]);
 
   useEffect(() => {
     // 处理从其他页面跳转过来带 hash 的情况
@@ -59,14 +94,21 @@ function HomePage() {
     <>
       <Hero
         matches={clubData?.pastMatches}
-        isLoading={!clubData && !loadError}
+        isLoading={isLoading}
       />
-      {!clubData && !loadError && (
+      {isLoading && (
         <div className="py-16 text-center text-gray-500" role="status">正在加载俱乐部数据…</div>
       )}
       {loadError && (
         <div className="mx-auto my-12 max-w-3xl rounded-xl border border-red-200 bg-red-50 px-6 py-5 text-center text-red-700" role="alert">
-          俱乐部数据暂时无法加载，请稍后刷新页面。
+          <p>{loadError}</p>
+          <button
+            type="button"
+            className="mt-3 rounded-md bg-red-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+            onClick={() => setReloadKey((key) => key + 1)}
+          >
+            重新加载
+          </button>
         </div>
       )}
       {clubData && (
