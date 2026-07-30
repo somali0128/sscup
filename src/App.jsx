@@ -14,28 +14,45 @@ import LimitedDropPage from './components/LimitedDropPage';
 
 const API_BASE_URL = import.meta.env.VITE_SOMA_API_URL ||
   (import.meta.env.DEV ? '' : 'https://api.sticksoma.art');
+const API_TIMEOUT_MS = 10_000;
+
+const isClubData = (value) => value &&
+  Array.isArray(value.players) &&
+  Array.isArray(value.news) &&
+  Array.isArray(value.recentMatches) &&
+  Array.isArray(value.pastMatches);
 
 function HomePage() {
   const location = useLocation();
   const [clubData, setClubData] = useState(null);
-  const [loadError, setLoadError] = useState(false);
+  const [loadError, setLoadError] = useState(null);
+  const [requestVersion, setRequestVersion] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort('timeout'), API_TIMEOUT_MS);
+
     fetch(`${API_BASE_URL}/api/sscup`, { signal: controller.signal })
       .then((response) => {
         if (!response.ok) throw new Error(`API returned ${response.status}`);
         return response.json();
       })
       .then((payload) => {
+        if (!isClubData(payload?.data)) throw new Error('API returned invalid club data');
         setClubData(payload.data);
-        setLoadError(false);
       })
-      .catch((error) => {
-        if (error.name !== 'AbortError') setLoadError(true);
+      .catch(() => {
+        if (controller.signal.reason === 'unmount') return;
+        setLoadError(controller.signal.reason === 'timeout' ? 'timeout' : 'request');
+      })
+      .finally(() => {
+        window.clearTimeout(timeoutId);
       });
-    return () => controller.abort();
-  }, []);
+    return () => {
+      window.clearTimeout(timeoutId);
+      controller.abort('unmount');
+    };
+  }, [requestVersion]);
 
   useEffect(() => {
     // 处理从其他页面跳转过来带 hash 的情况
@@ -66,7 +83,17 @@ function HomePage() {
       )}
       {loadError && (
         <div className="mx-auto my-12 max-w-3xl rounded-xl border border-red-200 bg-red-50 px-6 py-5 text-center text-red-700" role="alert">
-          俱乐部数据暂时无法加载，请稍后刷新页面。
+          <p>{loadError === 'timeout' ? '俱乐部数据请求超时，请稍后重试。' : '俱乐部数据暂时无法加载，请稍后重试。'}</p>
+          <button
+            type="button"
+            className="mt-4 rounded-lg bg-red-600 px-5 py-2 font-semibold text-white transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+            onClick={() => {
+              setLoadError(null);
+              setRequestVersion((version) => version + 1);
+            }}
+          >
+            重新加载
+          </button>
         </div>
       )}
       {clubData && (
