@@ -41,7 +41,7 @@ npm install
 npm run dev
 ```
 
-开发服务器默认使用 Vite 提供的地址。开发环境中的 `/api` 请求会代理到 `https://api.sticksoma.art`。
+开发服务器默认使用 Vite 提供的地址。开发环境中的 `/api` 请求会代理到 `https://api2.sticksoma.art`。
 
 ## 环境变量
 
@@ -56,7 +56,7 @@ VITE_SOMA_API_URL=https://your-api.example.com
 未配置该变量时：
 
 - 开发环境使用 Vite 的 `/api` 代理；
-- 生产环境使用 `https://api.sticksoma.art`。
+- 生产环境使用 `https://api2.sticksoma.art`。
 
 ## 常用命令
 
