@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://api.sticksoma.art',
+        target: 'https://api2.sticksoma.art',
         changeOrigin: true,
         secure: true,
       },
