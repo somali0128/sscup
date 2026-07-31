@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://api2.sticksoma.art',
+        target: 'https://soma-api-one.vercel.app',
         changeOrigin: true,
         secure: true,
       },
