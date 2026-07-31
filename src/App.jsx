@@ -13,7 +13,7 @@ import StreetFighterRegistration from './components/StreetFighterRegistration';
 import LimitedDropPage from './components/LimitedDropPage';
 
 const API_BASE_URL = import.meta.env.VITE_SOMA_API_URL ||
-  (import.meta.env.DEV ? '' : 'https://api2.sticksoma.art');
+  (import.meta.env.DEV ? '' : 'https://soma-api-one.vercel.app');
 const CLUB_DATA_TIMEOUT_MS = 12_000;
 
 function HomePage() {
