@@ -90,6 +90,11 @@ function LimitedDropPage() {
                 百变毛毛系列收录六款常规造型，每一款都带着不同的小道具与生活灵感。这是一份为朋友特别制作的限定礼盒。
               </p>
 
+              <div className="mt-5 rotate-[-1deg] rounded-2xl border-2 border-[#27304d] bg-[#ff5f88] px-5 py-4 text-center text-white shadow-[4px_4px_0_#27304d]">
+                <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#ffef9a]">A special birthday gift</p>
+                <p className="mt-1 text-lg font-black tracking-[0.08em]">此礼物用于纪念毛毛的 29 岁生日</p>
+              </div>
+
               <div className="mt-8 rounded-3xl border-2 border-[#27304d] bg-[#bdeff7] p-5 shadow-[5px_5px_0_#27304d]">
                 <div className="flex items-center justify-between text-sm">
                   <span className="font-bold">作品状态</span>
