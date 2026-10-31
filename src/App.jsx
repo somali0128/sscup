@@ -11,6 +11,7 @@ import Footer from './components/Footer';
 import MahjongCupRegistration from './components/MahjongCupRegistration';
 import StreetFighterRegistration from './components/StreetFighterRegistration';
 import LimitedDropPage from './components/LimitedDropPage';
+import ValorantRoom from './valorant/ValorantRoom';
 
 const API_BASE_URL = import.meta.env.VITE_SOMA_API_URL ||
   (import.meta.env.DEV ? '' : 'https://soma-api-one.vercel.app');
@@ -142,6 +143,7 @@ function App() {
   return (
     <Routes>
       <Route path="/event/limited-drop" element={<LimitedDropPage />} />
+      <Route path="/valorant" element={<ValorantRoom />} />
       <Route path="*" element={<MainSite />} />
     </Routes>
   );

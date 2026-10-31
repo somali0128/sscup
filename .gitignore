@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local backend verification checkout
+.work/
+artifacts/
+.vite/
+.env*
+!.env.example

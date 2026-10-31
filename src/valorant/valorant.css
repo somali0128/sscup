@@ -1,0 +1,679 @@
+.vr-app {
+  --vr-bg: #0d1922;
+  --vr-card: #142630;
+  --vr-border: #354b56;
+  --vr-muted: #abc0c9;
+  --vr-accent: #ff6370;
+  min-height: 100dvh;
+  background:
+    radial-gradient(ellipse at 90% 0%, #2b333d 0%, transparent 45%),
+    var(--vr-bg);
+  color: #f1f5f5;
+  font-family: Inter, "Microsoft YaHei", sans-serif;
+  line-height: 1.65;
+  color-scheme: dark;
+}
+.vr-app * {
+  box-sizing: border-box;
+}
+.vr-app button,
+.vr-app input,
+.vr-app select,
+.vr-app textarea {
+  font: inherit;
+}
+.vr-app button {
+  min-height: 48px;
+  padding: 10px 17px;
+  border: 1px solid #526a76;
+  border-radius: 8px;
+  background: #213743;
+  color: #f1f5f5;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.vr-app button:hover:not(:disabled) {
+  background: #304c5b;
+}
+.vr-app button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.vr-app :focus-visible {
+  outline: 3px solid #a7f5de;
+  outline-offset: 4px;
+}
+.vr-app button[aria-pressed="true"] {
+  background: #ff6370;
+  border-color: #ff6370;
+  color: #101d25;
+}
+.vr-app h1,
+.vr-app h2,
+.vr-app h3,
+.vr-app p {
+  margin: 0;
+}
+.vr-app h2 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+.vr-app h3 {
+  font-weight: 750;
+}
+.vr-app p + p {
+  margin-top: 8px;
+}
+.vr-app label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-block: 16px;
+  font-weight: 600;
+}
+.vr-app label > span {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--vr-muted);
+}
+.vr-app input:not([type="checkbox"]),
+.vr-app select,
+.vr-app textarea {
+  width: 100%;
+  min-height: 50px;
+  padding: 12px 14px;
+  border: 1px solid #69818d;
+  border-radius: 6px;
+  background: #0e1d27;
+  color: #fff;
+  font-size: 1rem;
+}
+.vr-app input:user-invalid {
+  border-color: #ff8d97;
+}
+.vr-app textarea {
+  resize: vertical;
+}
+.vr-app .vr-primary {
+  background: var(--vr-accent);
+  border-color: var(--vr-accent);
+  color: #101d25;
+  width: 100%;
+  font-weight: 800;
+}
+.vr-app .vr-primary:hover:not(:disabled) {
+  background: #ff8b94;
+}
+.vr-app .vr-danger {
+  color: #ffb3ba;
+  border-color: #a9636b;
+}
+.vr-header {
+  max-width: 1320px;
+  margin: auto;
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--vr-border);
+}
+.vr-brand {
+  font-weight: 950;
+  font-size: 1.5rem;
+  text-decoration: none;
+  color: #fff;
+  letter-spacing: -0.07em;
+}
+.vr-brand span {
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  color: var(--vr-muted);
+  margin-left: 14px;
+}
+.vr-header-tag {
+  font-size: 0.8rem;
+  color: var(--vr-muted);
+}
+.vr-shell {
+  max-width: 1180px;
+  padding: 44px 24px 24px;
+  margin: auto;
+}
+.vr-intro {
+  padding-bottom: 32px;
+}
+.vr-eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  font-weight: 750;
+  color: #b7d6dd;
+}
+.vr-intro h1 {
+  font-size: clamp(2.5rem, 5vw, 4.8rem);
+  line-height: 1.12;
+  font-weight: 950;
+  letter-spacing: -0.055em;
+  margin: 15px 0 18px;
+}
+.vr-intro h1 span {
+  color: var(--vr-accent);
+}
+.vr-intro p,
+.vr-muted {
+  color: var(--vr-muted);
+}
+.vr-panel {
+  background: var(--vr-card);
+  border: 1px solid var(--vr-border);
+  border-radius: 14px;
+  padding: 24px;
+  min-width: 0;
+}
+.vr-panel > h2 {
+  margin-bottom: 12px;
+}
+.vr-entry {
+  max-width: 540px;
+  margin: 0 auto;
+}
+.vr-entry h2 {
+  font-size: 1.8rem;
+  margin: 9px 0 12px;
+}
+.vr-entry-notes {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.8rem;
+  color: var(--vr-muted);
+  gap: 8px;
+  border-top: 1px solid var(--vr-border);
+  margin-top: 24px;
+  padding-top: 20px;
+}
+.vr-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 24px 0;
+  flex-wrap: wrap;
+}
+.vr-tabs button {
+  flex: 1;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+.vr-room-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  border-block: 1px solid var(--vr-border);
+  padding: 20px 0;
+}
+.vr-room-bar strong {
+  display: block;
+  font-size: 2rem;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+}
+.vr-room-status {
+  margin-right: auto;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+}
+.vr-room-status span {
+  color: var(--vr-muted);
+  font-size: 0.75rem;
+}
+.vr-game-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 20px;
+}
+.vr-main-column,
+.vr-side-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+.vr-team-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.vr-team {
+  padding: 20px;
+}
+.vr-team-left {
+  border-top: 3px solid #76daca;
+}
+.vr-team-right {
+  border-top: 3px solid #ff8290;
+}
+.vr-section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.vr-section-title > span {
+  font-size: 0.75rem;
+  color: var(--vr-muted);
+  white-space: nowrap;
+}
+.vr-player {
+  padding: 14px 0;
+  border-top: 1px solid var(--vr-border);
+  overflow-wrap: anywhere;
+}
+.vr-player > div {
+  display: flex;
+  flex-direction: column;
+}
+.vr-player span,
+.vr-player small {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--vr-muted);
+}
+.vr-player p {
+  margin-top: 9px;
+  font-size: 0.9rem;
+}
+.vr-player .vr-online {
+  color: #98e8cd;
+}
+.vr-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+.vr-actions button {
+  flex: 1;
+  white-space: nowrap;
+}
+.vr-caption {
+  font-size: 0.78rem;
+  color: var(--vr-muted);
+  margin-top: 14px !important;
+}
+.vr-app .vr-checkbox {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-size: 0.9rem;
+  min-height: 48px;
+  gap: 12px;
+}
+.vr-checkbox input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--vr-accent);
+  flex-shrink: 0;
+}
+.vr-stacked {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+.vr-wheel-panel {
+  text-align: center;
+  overflow: hidden;
+}
+.vr-wheel-wrap {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  margin: 22px auto 26px;
+}
+.vr-wheel {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 7px solid #536b78;
+  position: relative;
+  box-shadow: 0 0 0 7px #0c1b24;
+  transform: rotate(var(--finish, 0deg));
+}
+.vr-wheel-spin {
+  animation: vr-spin 1.8s cubic-bezier(0.15, 0.6, 0.2, 1) both;
+}
+.vr-wheel > span {
+  position: absolute;
+  left: calc(50% - 10px);
+  top: calc(50% - 9px);
+  width: 20px;
+  line-height: 18px;
+  font-size: 9px;
+  font-weight: 800;
+  color: white;
+}
+.vr-pointer {
+  position: absolute;
+  z-index: 2;
+  left: calc(50% - 12px);
+  top: -11px;
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 27px solid #f5f2dc;
+  filter: drop-shadow(0 3px 3px #0008);
+}
+.vr-wheel-hub {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 104px;
+  height: 104px;
+  border: 5px solid #425965;
+  border-radius: 50%;
+  background: #0d1d27;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 1.7rem;
+  box-shadow: 0 3px 20px #0007;
+}
+.vr-wheel-hub span {
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  font-weight: 500;
+}
+.vr-result {
+  background: #0e1d27;
+  border: 1px solid var(--vr-border);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 18px;
+  min-height: 145px;
+}
+.vr-result h3 {
+  font-size: 1.7rem;
+  margin: 5px 0 9px;
+  color: #fff;
+}
+.vr-result p {
+  font-size: 0.95rem;
+  color: #d4e0e4;
+}
+.vr-result .vr-warning {
+  font-size: 0.78rem;
+  color: #ffd592;
+  margin-top: 12px;
+}
+.vr-callout,
+.vr-confirm {
+  background: #233d46;
+  border: 1px solid #63848c;
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 16px;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+.vr-confirm {
+  border-color: #ff8591;
+  background: #352d36;
+}
+.vr-error {
+  border: 1px solid #ff8591;
+  background: #3d2530;
+  color: #ffdae0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.vr-member {
+  border-top: 1px solid var(--vr-border);
+  padding: 12px 0;
+  overflow-wrap: anywhere;
+}
+.vr-member summary {
+  cursor: pointer;
+  min-height: 48px;
+  align-content: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.vr-member summary span {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--vr-muted);
+  font-weight: 400;
+}
+.vr-member > button {
+  width: 100%;
+  margin-top: 8px;
+}
+.vr-member p {
+  font-size: 0.8rem;
+  color: var(--vr-muted);
+}
+.vr-member form {
+  border-top: 1px solid var(--vr-border);
+  margin-top: 12px;
+}
+.vr-event-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 24px;
+  margin-top: 16px;
+}
+.vr-event-list article {
+  display: flex;
+  gap: 16px;
+  padding: 20px 0;
+  border-top: 1px solid var(--vr-border);
+}
+.vr-event-list article > span {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ff8d98;
+}
+.vr-event-list p {
+  font-size: 0.9rem;
+  color: var(--vr-muted);
+  margin-top: 6px;
+}
+.vr-event-list small {
+  color: #ffd592;
+}
+.vr-history ol {
+  list-style: none;
+  margin: 20px 0;
+  padding: 0;
+}
+.vr-history li {
+  padding: 18px 0;
+  border-top: 1px solid var(--vr-border);
+}
+.vr-history-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.vr-history time {
+  color: var(--vr-muted);
+  font-size: 0.78rem;
+}
+.vr-history-description {
+  display: block;
+  color: var(--vr-muted);
+  font-size: 0.85rem;
+}
+.vr-footer {
+  font-size: 0.75rem;
+  color: var(--vr-muted);
+  text-align: center;
+  margin-top: 48px;
+  padding: 20px 0;
+}
+.vr-app .vr-text-button {
+  background: none;
+  border: 0;
+  align-self: flex-end;
+  padding: 0 8px;
+  font-size: 0.8rem;
+}
+@keyframes vr-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(var(--finish));
+  }
+}
+@media (max-width: 900px) {
+  .vr-game-grid {
+    grid-template-columns: 1fr;
+  }
+  .vr-side-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+@media (max-width: 560px) {
+  .vr-header {
+    padding: 18px 16px;
+  }
+  .vr-header-tag {
+    display: none;
+  }
+  .vr-shell {
+    padding: 28px 16px 16px;
+  }
+  .vr-intro {
+    padding-bottom: 25px;
+  }
+  .vr-intro h1 {
+    font-size: 3rem;
+  }
+  .vr-panel {
+    padding: 18px;
+  }
+  .vr-team-grid,
+  .vr-side-column,
+  .vr-event-list {
+    grid-template-columns: 1fr;
+  }
+  .vr-room-bar {
+    gap: 12px;
+  }
+  .vr-room-bar > button {
+    flex: 1;
+  }
+  .vr-room-status {
+    margin-right: 0;
+  }
+  .vr-room-bar > div {
+    flex: 1;
+  }
+  .vr-wheel-wrap {
+    width: 280px;
+    height: 280px;
+  }
+  .vr-wheel > span {
+    transform-origin: center;
+  }
+  .vr-error {
+    align-items: start;
+    flex-direction: column;
+  }
+  .vr-tabs {
+    gap: 5px;
+  }
+  .vr-tabs button {
+    padding: 10px 6px;
+    font-size: 0.8rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vr-wheel-spin {
+    animation: none;
+  }
+  .vr-app * {
+    transition: none !important;
+  }
+}
+@media (max-width: 560px) {
+  .vr-room-bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .vr-room-bar strong {
+    font-size: 1.75rem;
+    letter-spacing: 0.1em;
+  }
+  .vr-room-status {
+    align-items: flex-end;
+    text-align: right;
+  }
+  .vr-room-bar > button {
+    white-space: nowrap;
+  }
+  .vr-wheel-wrap {
+    width: min(280px, 100%);
+    height: auto;
+    aspect-ratio: 1;
+  }
+  .vr-brand span {
+    letter-spacing: 0.04em;
+    margin-left: 8px;
+  }
+}
+.vr-wheel-labels {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.vr-wheel-labels text {
+  fill: white;
+  font-size: 12px;
+  font-weight: 400;
+  stroke: #000;
+  stroke-width: 1.2px;
+  stroke-linejoin: round;
+  paint-order: stroke fill;
+  font-family: "Microsoft YaHei", sans-serif;
+}
+.vr-intro h1 .vr-title-name {
+  color: inherit;
+  font-size: clamp(1.35rem, 4vw, 3rem);
+  letter-spacing: -.035em;
+}
+.vr-wheel-hub {
+  width: 64px;
+  height: 64px;
+  font-size: 1.1rem;
+  border-width: 3px;
+}
+.vr-wheel-hub span {
+  font-size: 0.5rem;
+  letter-spacing: 0.05em;
+}
+.vr-wheel-wrap {
+  width: min(400px, 100%);
+  height: auto;
+  aspect-ratio: 1;
+}
+@media (max-width: 560px) {
+  .vr-wheel-wrap {
+    width: 100%;
+  }
+}

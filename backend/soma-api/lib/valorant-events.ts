@@ -1,0 +1,32 @@
+// Existing games retain their event-pool snapshot; new games use this version.
+export const EVENT_POOL_VERSION = 2;
+export const EVENTS = [
+  "全程下蹲",
+  "全程跳跃",
+  "不能松开W",
+  "不能按W",
+  "全程静步",
+  "不能静步",
+  "只能唱歌",
+  "只能说英文",
+  "只能说“好”",
+  "只能说“我不”",
+  "只能发出“嗯”音",
+  "不能使用技能",
+  "鼠标左右键互换",
+  "移动左右键互换",
+  "移动前后键互换",
+  "只能用手枪",
+  "只能用喷子",
+  "只能用机枪",
+  "只能用狙",
+  "只能用刀",
+  "灵敏度/2",
+  "灵敏度*2",
+  "不能买枪（队友可发）",
+  "必须由你下/拆包",
+  "你不能下/拆包",
+  "开火键绑丢枪",
+  "开火键绑跳跃",
+].map((name, i) => ({ id: "v2-" + String(i + 1).padStart(2, "0"), name }));
+export type WheelEvent = (typeof EVENTS)[number];
