@@ -14,12 +14,14 @@ function Navbar() {
     { name: '近期比赛', href: '#recent-matches' },
     { name: '往期比赛', href: '#past-matches' },
     { name: '排行榜', href: '#leaderboard' },
+    { name: '无畏契约轮盘', href: '/valorant' },
     // { name: '查询功能', href: '#search' },
     { name: '关于', href: '#about' },
   ];
 
   // 处理导航点击，如果在报名页，需要跳转到首页并滚动
   const handleNavClick = (e, href) => {
+    if (href.startsWith('/')) { e.preventDefault(); navigate(href); return; }
     if (isRegistrationPage) {
       e.preventDefault();
       navigate(`/${href}`);
@@ -60,7 +62,7 @@ function Navbar() {
               {navItems.map((item) => (
                 <a
                   key={item.name}
-                  href={isRegistrationPage ? `/${item.href}` : item.href}
+                  href={isRegistrationPage && !item.href.startsWith('/') ? `/${item.href}` : item.href}
                   onClick={(e) => handleNavClick(e, item.href)}
                   className="text-gray-700 hover:text-[#1E90FF] px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
                 >
@@ -110,7 +112,7 @@ function Navbar() {
             {navItems.map((item) => (
               <a
                 key={item.name}
-                href={isRegistrationPage ? `/${item.href}` : item.href}
+                href={isRegistrationPage && !item.href.startsWith('/') ? `/${item.href}` : item.href}
                 onClick={(e) => {
                   handleNavClick(e, item.href);
                   setIsOpen(false);

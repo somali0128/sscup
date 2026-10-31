@@ -12,6 +12,7 @@
 - 限定活动商品展示页
 - 响应式导航与移动端布局
 - 远程数据加载、加载状态和错误提示
+- 无畏契约多人轮盘房间（需配套后端部署），支持分队、裁判、抽取同步与历史下载
 
 ## 页面路由
 
@@ -21,8 +22,11 @@
 | `/mahjong-cup-registration` | 雀魂赛事介绍、规则与报名方式 |
 | `/sf6-registration` | 街头霸王 6 赛事介绍、规则与报名表 |
 | `/event/limited-drop` | 限定活动商品展示 |
+| `/valorant` | 无畏契约多人轮盘房间 |
 
 ## 技术栈
+
+无畏契约功能的部署、事件修改与验收说明见 [docs/valorant-room.md](docs/valorant-room.md)。
 
 - React 19
 - React Router 7
