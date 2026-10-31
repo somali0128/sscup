@@ -465,7 +465,7 @@ export default function ValorantRoom() {
                 ? "身份失效，请返回入口恢复"
                 : e.status === 404
                   ? "房间不存在或已过期"
-                  : "连接中断 · 正在重试",
+                  : `${e.message || "连接中断"}（正在自动重试）`,
             );
         }
       }

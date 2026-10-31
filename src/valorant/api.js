@@ -1,7 +1,6 @@
-const BASE =
-  import.meta.env.VITE_SOMA_API_URL ||
-  (import.meta.env.DEV ? "" : "https://soma-api-one.vercel.app");
-export const ENDPOINT = `${BASE}/api/valorant`;
+// Vercel (production) and Vite (development) forward this same-origin route.
+// Browsers must not need direct access to the backend's hosting domain.
+export const ENDPOINT = "/api/valorant";
 export function newToken() {
   return Array.from(crypto.getRandomValues(new Uint8Array(32)), (x) =>
     x.toString(16).padStart(2, "0"),
@@ -42,6 +41,12 @@ export async function request(token, body, query = {}) {
       }
       return json;
     } catch (error) {
+      if (attempt === 1 && !error.status) {
+        if (error.name === "AbortError")
+          throw new Error("连接超时，请检查网络后重试；重复提交不会重复执行操作。");
+        if (error instanceof TypeError)
+          throw new Error("无法连接房间服务，请检查网络后重试。");
+      }
       if (
         error.status ||
         attempt === 1 ||

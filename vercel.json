@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/api/valorant",
+      "destination": "https://soma-api-one.vercel.app/api/valorant"
+    },
+    {
+      "source": "/api/sscup",
+      "destination": "https://soma-api-one.vercel.app/api/sscup"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
