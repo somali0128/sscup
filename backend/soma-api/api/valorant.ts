@@ -11,8 +11,12 @@ import {
   RETENTION_MS,
   RoomError,
   roomView,
+  visibleOutcome,
   visibleResults,
+  visibleRounds,
+  score,
   type Room,
+  type RoundRecord,
   type Log,
   type Member,
   type Command,
@@ -46,6 +50,7 @@ const bodySchema = z
       "takeover",
       "remove",
       "recover",
+      "amend",
     ]),
     code: codeSchema.optional(),
     nickname: nicknameSchema.optional(),
@@ -57,6 +62,9 @@ const bodySchema = z
     unified: z.boolean().optional(),
     enabled: z.boolean().optional(),
     recoveryToken: credential.optional(),
+    winner: z.enum(["left", "right"]).nullable().optional(),
+    round: z.number().int().positive().optional(),
+    gameId: z.string().uuid().optional(),
   })
   .strict();
 type Game = {
@@ -67,7 +75,11 @@ type Game = {
   endedAt?: number;
   expiresAt: Date;
   members: { id: string; nickname: string; team: Member["team"] }[];
+  rounds?: RoundRecord[];
 };
+// Round-scoped actions only need the same game and round, so concurrent
+// personal redraws by other players do not reject the host's confirmation.
+const ROUND_SCOPED = new Set(["spin", "spinAll", "nextRound", "end"]);
 let indexes: Promise<unknown> | undefined;
 function init(db: Db) {
   if (!indexes)
@@ -196,6 +208,29 @@ export default withApi(async (req, res) => {
           })),
         });
       }
+      if (req.query.view === "summary") {
+        const gameId = z.string().uuid().parse(req.query.gameId);
+        const game = await games.findOne({
+          _id: gameId,
+          room: code,
+          "members.id": me.id,
+          expiresAt: { $gt: new Date(now) },
+        });
+        ensure(game, "该场记录不存在、已过期或无权访问。", 404);
+        const rounds = game.rounds || [];
+        const shown = game.endedAt ? rounds : visibleRounds(room, me, rounds);
+        return res.json({
+          data: {
+            id: game._id,
+            number: game.number,
+            startedAt: game.startedAt,
+            endedAt: game.endedAt,
+            members: game.members,
+            rounds: shown,
+            score: score(rounds),
+          },
+        });
+      }
       if (req.query.view === "history") {
         const gameId = z.string().uuid().parse(req.query.gameId);
         const game = await games.findOne({
@@ -223,15 +258,22 @@ export default withApi(async (req, res) => {
           .toArray();
         const page = rows.slice(0, 100);
         return res.json({
-          data: page.map(({ _id, seq, round, at, actor, action, results }) => ({
-            id: _id,
-            seq,
-            round,
-            at,
-            actor,
-            action,
-            results: game.endedAt ? results : visibleResults(room, me, results),
-          })),
+          data: page.map(
+            ({ _id, seq, round, at, actor, action, results, outcome }) => ({
+              id: _id,
+              seq,
+              round,
+              at,
+              actor,
+              action,
+              results: game.endedAt
+                ? results
+                : visibleResults(room, me, results),
+              outcome: game.endedAt
+                ? outcome
+                : visibleOutcome(room, me, outcome),
+            }),
+          ),
           next: rows.length > 100 ? page[page.length - 1].seq : null,
         });
       }
@@ -332,10 +374,26 @@ export default withApi(async (req, res) => {
           joinRoom(room, nicknameSchema.parse(body.nickname), tokenHash, now);
         else {
           const me = member(room, tokenHash);
-          ensure(
-            body.version === room.version,
-            "房间状态已更新，请查看最新状态后重试。",
-          );
+          if (ROUND_SCOPED.has(body.action) && body.round !== undefined) {
+            ensure(
+              room.phase === "playing" &&
+                body.gameId === room.gameId &&
+                body.round === room.round,
+              "本回合已更新，请查看最新状态后重试。",
+            );
+          } else if (body.action === "team") {
+            // Choosing one's own seat cannot act on stale state; capacity is
+            // checked inside this transaction.
+          } else if (body.action === "amend") {
+            ensure(
+              room.gameId && body.gameId === room.gameId,
+              "对局已更新，请查看最新状态后重试。",
+            );
+          } else
+            ensure(
+              body.version === room.version,
+              "房间状态已更新，请查看最新状态后重试。",
+            );
           const p = await presence(db, code);
           const log = applyCommand(
             room,
@@ -361,6 +419,12 @@ export default withApi(async (req, res) => {
               { session },
             );
           if (log) await logs.insertOne(log, { session });
+          if (["nextRound", "end", "amend"].includes(body.action))
+            await games.updateOne(
+              { _id: room.gameId! },
+              { $set: { rounds: room.rounds || [] } },
+              { session },
+            );
           if (body.action === "end") {
             const expiresAt = new Date(now + RETENTION_MS);
             await games.updateOne(

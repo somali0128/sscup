@@ -22,6 +22,7 @@ export const ensure: (
   if (!condition) throw new RoomError(status, message);
 };
 export type Team = "left" | "right" | null;
+export type Side = "left" | "right";
 export type Member = {
   id: string;
   nickname: string;
@@ -39,6 +40,28 @@ export type Result = {
   drawId: string;
   at: number;
 };
+// The effect each participant carried when the host confirmed a round outcome.
+export type RoundEffect = {
+  memberId: string;
+  nickname: string;
+  team: Team;
+  event: WheelEvent;
+  rerolls: number;
+};
+export type RoundRecord = {
+  round: number;
+  winner: Side | null;
+  decidedAt: number;
+  decidedBy: string;
+  amendedAt?: number;
+  effects: RoundEffect[];
+};
+export type Outcome = {
+  round: number;
+  winner: Side | null;
+  previous?: Side | null;
+  effects: RoundEffect[];
+};
 export type Room = {
   _id: string;
   creationKey: string;
@@ -55,6 +78,9 @@ export type Room = {
   results: Result[];
   expiresAt: Date;
   lastDrawAt: Record<string, number>;
+  // Absent on rooms created before round outcomes existed.
+  rounds?: RoundRecord[];
+  rerolls?: Record<string, number>;
 };
 export type Action =
   | "team"
@@ -69,7 +95,8 @@ export type Action =
   | "transfer"
   | "takeover"
   | "remove"
-  | "recover";
+  | "recover"
+  | "amend";
 export type Command = {
   action: Action;
   targetId?: string;
@@ -77,6 +104,8 @@ export type Command = {
   unified?: boolean;
   enabled?: boolean;
   recoveryHash?: string;
+  winner?: Side | null;
+  round?: number;
 };
 export type Log = {
   _id: string;
@@ -89,15 +118,30 @@ export type Log = {
   actor: string;
   action: string;
   results: Result[];
+  outcome?: Outcome;
   expiresAt: Date;
 };
 export const isManager = (r: Room, m: Member) => r.hostId === m.id || m.referee;
 export const seesAll = (r: Room, m: Member) =>
   r.phase === "ended" || (!m.team && isManager(r, m));
-export const visibleResults = (r: Room, m: Member, results: Result[]) =>
+export const visibleResults = <T extends { team: Team }>(
+  r: Room,
+  m: Member,
+  results: T[],
+) =>
   results.filter(
     (x) => seesAll(r, m) || (m.team !== null && x.team === m.team),
   );
+// Round winners are public; opponents' effects follow normal visibility.
+export const visibleRounds = (r: Room, m: Member, rounds: RoundRecord[]) =>
+  rounds.map((x) => ({ ...x, effects: visibleResults(r, m, x.effects) }));
+export const visibleOutcome = (r: Room, m: Member, outcome?: Outcome) =>
+  outcome && { ...outcome, effects: visibleResults(r, m, outcome.effects) };
+export const score = (rounds: RoundRecord[]) => ({
+  left: rounds.filter((x) => x.winner === "left").length,
+  right: rounds.filter((x) => x.winner === "right").length,
+});
+const isSide = (x: unknown): x is Side => x === "left" || x === "right";
 export function roomView(
   r: Room,
   m: Member,
@@ -116,6 +160,9 @@ export function roomView(
     unified: r.unified,
     pool: r.pool,
     results: visibleResults(r, m, r.results),
+    rounds: visibleRounds(r, m, r.rounds || []),
+    score: score(r.rounds || []),
+    rerolls: r.rerolls || {},
     expiresAt: r.expiresAt,
     members: r.members.map(({ id, nickname, team, referee }) => ({
       id,
@@ -125,6 +172,7 @@ export function roomView(
       online: now - (presence[id] || 0) < 20_000,
     })),
     canManage: isManager(r, m),
+    canDecide: r.hostId === m.id && r.phase === "playing",
     canSeeAll: seesAll(r, m),
     canTakeover:
       m.referee &&
@@ -162,7 +210,28 @@ export function makeRoom(
     results: [],
     expiresAt: new Date(now + RETENTION_MS),
     lastDrawAt: {},
+    rounds: [],
+    rerolls: {},
   };
+}
+function recordRound(r: Room, actor: Member, winner: Side | null, now: number) {
+  const rerolls = r.rerolls || {};
+  const record: RoundRecord = {
+    round: r.round,
+    winner,
+    decidedAt: now,
+    decidedBy: actor.nickname,
+    effects: r.results.map((x) => ({
+      memberId: x.memberId,
+      nickname: x.nickname,
+      team: x.team,
+      event: structuredClone(x.event),
+      rerolls: rerolls[x.memberId] || 0,
+    })),
+  };
+  r.rounds = [...(r.rounds || []).filter((x) => x.round !== r.round), record];
+  r.rerolls = {};
+  return { round: record.round, winner, effects: record.effects };
 }
 export function joinRoom(r: Room, nickname: string, hash: string, now: number) {
   const existing = r.members.find((m) => m.tokenHash === hash);
@@ -204,6 +273,9 @@ export function applyCommand(
   const managing = () => ensure(manager, "只有房主或裁判可以操作。", 403);
   const playing = () => ensure(r.phase === "playing", "当前没有进行中的对局。");
   let drawMembers: Member[] = [];
+  let outcome: Outcome | undefined;
+  r.rounds ||= [];
+  r.rerolls ||= {};
   switch (cmd.action) {
     case "team":
       lobby();
@@ -252,6 +324,8 @@ export function applyCommand(
       r.poolVersion = EVENT_POOL_VERSION;
       r.results = [];
       r.lastDrawAt = {};
+      r.rounds = [];
+      r.rerolls = {};
       drawMembers = r.members.filter((m) => m.team);
       break;
     case "spin":
@@ -264,6 +338,7 @@ export function applyCommand(
         429,
       );
       drawMembers = [actor];
+      r.rerolls[actor.id] = (r.rerolls[actor.id] || 0) + 1;
       break;
     case "spinAll":
       playing();
@@ -278,16 +353,42 @@ export function applyCommand(
       break;
     case "nextRound":
       playing();
-      managing();
+      ensure(host, "只有房主可以确认本回合胜负。", 403);
+      ensure(isSide(cmd.winner), "请选择本回合胜方。", 400);
+      outcome = recordRound(r, actor, cmd.winner, now);
       r.round++;
       r.lastDrawAt.all = now;
       drawMembers = r.members.filter((m) => m.team);
       break;
     case "end":
       playing();
-      managing();
+      ensure(host, "只有房主可以确认胜负并结束本场。", 403);
+      ensure(
+        cmd.winner === undefined || cmd.winner === null || isSide(cmd.winner),
+        "请选择有效的胜方。",
+        400,
+      );
+      // The final round may be abandoned; it is then left out of the record.
+      if (isSide(cmd.winner)) outcome = recordRound(r, actor, cmd.winner, now);
       r.phase = "ended";
       break;
+    case "amend": {
+      ensure(r.phase !== "lobby" && r.gameId, "当前没有可修正的对局。");
+      ensure(host, "只有房主可以修正回合胜负。", 403);
+      ensure(isSide(cmd.winner), "请选择有效的胜方。", 400);
+      const record = r.rounds.find((x) => x.round === cmd.round);
+      ensure(record, "找不到该回合的胜负记录。", 404);
+      ensure(record.winner !== cmd.winner, "该回合已是此结果。");
+      outcome = {
+        round: record.round,
+        winner: cmd.winner,
+        previous: record.winner,
+        effects: [],
+      };
+      record.winner = cmd.winner;
+      record.amendedAt = now;
+      break;
+    }
     case "reset":
       managing();
       ensure(r.phase === "ended", "请先结束本场。");
@@ -296,6 +397,8 @@ export function applyCommand(
       r.results = [];
       r.round = 0;
       r.lastDrawAt = {};
+      r.rounds = [];
+      r.rerolls = {};
       break;
     case "transfer":
       ensure(host, "只有房主可以移交。", 403);
@@ -376,7 +479,12 @@ export function applyCommand(
         actor: actor.nickname,
         action: cmd.action,
         results,
-        expiresAt: new Date(now + RETENTION_MS),
+        ...(outcome ? { outcome } : {}),
+        // Corrections after the end keep the game's fixed expiry.
+        expiresAt:
+          r.phase === "ended" && cmd.action !== "end"
+            ? r.expiresAt
+            : new Date(now + RETENTION_MS),
       }
     : null;
 }
