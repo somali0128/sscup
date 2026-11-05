@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ENDPOINT, newToken } from "./api";
 
-export default function Entry({ onEnter, busy }) {
+export default function Entry({ onEnter, busy, onFree }) {
   const [mode, setMode] = useState("join");
   const [showPassword, setShowPassword] = useState(false);
   const [recovery] = useState(newToken);
@@ -145,6 +145,10 @@ export default function Entry({ onEnter, busy }) {
                 : "加入房间 →"}
         </button>
       </form>
+      <button type="button" className="vr-free-entry" onClick={onFree}>
+        <b>不开房间，自由转盘 →</b>
+        <span>自己转着玩，没有队友和历史记录</span>
+      </button>
       <div className="vr-entry-notes">
         <span>01 / 游戏昵称入场</span>
         <span>02 / 选队后开始</span>

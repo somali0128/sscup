@@ -93,6 +93,10 @@ export const actionNames = {
 };
 export const teamLabel = (team) =>
   team === "left" ? "左队" : team === "right" ? "右队" : "";
+const TIER_LABEL = { white: "白", purple: "紫", gold: "金" };
+const tierLabel = (event) => (event ? TIER_LABEL[event.tier] || "" : "");
+const names = (x) => [x?.event, x?.extra].filter(Boolean).map((e) => e.name).join(" + ");
+const tiers = (x) => [x?.event, x?.extra].filter(Boolean).map(tierLabel).join(" + ");
 export function csvCell(value) {
   let text = String(value ?? "");
   if (/^[\s]*[=+@-]/.test(text) || /^[\t\r\n]/.test(text)) text = `'${text}`;
@@ -113,8 +117,11 @@ export function roundRows(game, rounds) {
       "游戏昵称",
       "队伍",
       "本回合效果",
+      "效果难度",
       "是否获胜",
       "本回合重抽次数",
+      "手枪局",
+      "是否榜一",
     ],
     ...rounds.flatMap((round) =>
       (round.effects.length ? round.effects : [{}]).map((effect) => [
@@ -126,7 +133,8 @@ export function roundRows(game, rounds) {
         iso(round.amendedAt),
         effect.nickname,
         teamLabel(effect.team),
-        effect.event?.name,
+        names(effect),
+        tiers(effect),
         effect.team
           ? round.winner
             ? effect.team === round.winner
@@ -135,6 +143,8 @@ export function roundRows(game, rounds) {
             : ""
           : "",
         effect.rerolls ?? "",
+        round.pistol ? "是" : "",
+        round.top && round.top === effect.memberId ? "是" : "",
       ]),
     ),
   ];
@@ -151,6 +161,7 @@ export function drawRows(game, records) {
       "游戏昵称",
       "队伍",
       "效果",
+      "效果难度",
       "回合结果",
     ],
     ...records.flatMap((row) =>
@@ -163,7 +174,8 @@ export function drawRows(game, records) {
         row.id,
         result.nickname,
         teamLabel(result.team),
-        result.event?.name,
+        names(result),
+        tiers(result),
         row.outcome
           ? `R${row.outcome.round} ${teamLabel(row.outcome.winner) || "未记录"}胜`
           : "",

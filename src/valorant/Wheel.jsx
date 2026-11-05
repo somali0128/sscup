@@ -1,10 +1,26 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { mod, point, restAngle, soundEnabled, tone, unlockAudio } from "./wheel-utils";
+import { TIERS, tierClass, tierOf } from "./tiers";
+import {
+  effectsOf,
+  mod,
+  point,
+  restAngle,
+  soundEnabled,
+  stopAngle,
+  tone,
+  unlockAudio,
+} from "./wheel-utils";
 
-const COLORS = ["#fd5d68", "#1f3845", "#33525f"];
+// Wedges are coloured by difficulty, alternating shades so neighbours separate.
+const COLORS = {
+  white: ["#40596a", "#4b6576"],
+  purple: ["#5a3a8e", "#6a45a4"],
+  gold: ["#a3731a", "#b98522"],
+};
 const CRUISE = 0.9; // degrees per millisecond at full speed
 const ACCEL_MS = 520;
 const LAND_TRAVEL = 1080; // minimum degrees covered while slowing down
+const BETWEEN_STOPS_MS = 1100;
 
 export function WheelFace({ pool, hit = -1, labels = true }) {
   const n = pool.length || 1;
@@ -18,7 +34,7 @@ export function WheelFace({ pool, hit = -1, labels = true }) {
         <path
           key={item.id}
           d={`M200 200 L${point(186, i * seg)} A186 186 0 ${seg > 180 ? 1 : 0} 1 ${point(186, (i + 1) * seg)} Z`}
-          fill={COLORS[n % 3 === 1 && i === n - 1 ? 1 : i % 3]}
+          fill={COLORS[tierOf(item)][i % 2]}
           className={i === hit ? "vr-wedge vr-wedge-hit" : "vr-wedge"}
         />
       ))}
@@ -65,9 +81,32 @@ export function MiniWheel({ pool, result, onClick, label }) {
   );
 }
 
+export function EffectName({ event, small = false }) {
+  return (
+    <span className={`vr-effect ${tierClass(event)} ${small ? "vr-effect-small" : ""}`}>
+      <i className="vr-tier-badge" aria-label={`${TIERS[tierOf(event)].name}难度`}>
+        {TIERS[tierOf(event)].label}
+      </i>
+      {event.name}
+    </span>
+  );
+}
+
+function revealSound(tier) {
+  if (tier === "gold") {
+    [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0.9, 0.06, "sine", i * 0.08));
+  } else if (tier === "purple") {
+    [659, 988, 1319].forEach((f, i) => tone(f, 0.7, 0.06, "sine", i * 0.09));
+  } else {
+    tone(784, 0.5, 0.07, "sine");
+    tone(1175, 0.6, 0.05, "sine", 0.09);
+  }
+}
+
 /**
  * Full-screen spin show. `target` is the result to land on; while it is null
- * (a personal draw still in flight) the wheel keeps cruising.
+ * (a personal draw still in flight) the wheel keeps cruising. A result with an
+ * extra effect stops twice.
  */
 export function SpinStage({
   pool,
@@ -83,8 +122,11 @@ export function SpinStage({
   const pointerRef = useRef(null);
   const closeRef = useRef(null);
   const motion = useRef(null);
-  const [landedId, setLandedId] = useState(null);
-  const landed = !!target && landedId === target.drawId;
+  // How many effects of which draw have been revealed so far.
+  const [reveal, setReveal] = useState({ id: null, count: 0 });
+  const stops = effectsOf(target);
+  const revealed = target && reveal.id === target.drawId ? stops.slice(0, reveal.count) : [];
+  const landed = !!target && revealed.length === stops.length && stops.length > 0;
   const [sound, setSound] = useState(soundEnabled);
   const soundRef = useRef(sound);
   const callbacks = useRef({ onLanded, onClose });
@@ -95,11 +137,11 @@ export function SpinStage({
   });
   const n = pool.length || 1;
   const seg = 360 / n;
-  const hit = target
-    ? pool.findIndex((x) => x.id === target.event.id)
-    : -1;
+  const current = revealed.at(-1);
+  const hit = current ? pool.findIndex((x) => x.id === current.id) : -1;
+  const double = stops.length > 1;
 
-  // Animation state lives in a ref; React only re-renders on landing.
+  // Animation state lives in a ref; React only re-renders when an effect lands.
   useEffect(() => {
     const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const m = (motion.current ||= {
@@ -111,47 +153,58 @@ export function SpinStage({
       segment: null,
       plan: null,
       target: null,
+      stop: 0,
       frame: 0,
+      timer: 0,
       last: 0,
     });
     m.target = target;
-    m.reduced = reduced;
-    if (target && (m.mode === "decel" || m.mode === "landed")) {
+    if (target && m.mode !== "accel" && m.mode !== "cruise") {
       // A newer draw arrived mid-show: spin up again toward the new result.
       m.mode = "accel";
       m.plan = null;
     }
+    m.stop = 0;
+    const list = effectsOf(target);
+    const angleOf = (stop) => stopAngle(pool, list[stop], target?.drawId, stop);
     const paint = () => {
       if (wheelRef.current)
         wheelRef.current.style.transform = `rotate(${m.angle}deg)`;
       if (pointerRef.current)
         pointerRef.current.style.transform = `rotate(${-26 * m.kick}deg)`;
     };
+    const show = (count) => setReveal({ id: target.drawId, count });
     const land = () => {
-      m.mode = "landed";
       m.v = 0;
-      m.angle = restAngle(pool, m.target);
+      m.angle = angleOf(m.stop);
       paint();
-      setLandedId(m.target.drawId);
-      if (soundRef.current) {
-        tone(784, 0.5, 0.07, "sine");
-        tone(1175, 0.7, 0.06, "sine", 0.09);
-        tone(1568, 0.8, 0.04, "sine", 0.18);
+      const tier = tierOf(list[m.stop]);
+      if (soundRef.current) revealSound(tier);
+      navigator.vibrate?.(tier === "gold" ? [40, 50, 40, 50, 120] : [24, 40, 60]);
+      show(m.stop + 1);
+      if (m.stop < list.length - 1) {
+        // Second effect for the sanctioned top player: pause, then spin again.
+        m.mode = "between";
+        m.timer = setTimeout(() => {
+          m.stop++;
+          m.mode = "accel";
+          m.last = 0;
+          m.frame = requestAnimationFrame(step);
+        }, BETWEEN_STOPS_MS);
+        return;
       }
-      navigator.vibrate?.([24, 40, 60]);
-      callbacks.current.onLanded?.(m.target);
+      m.mode = "landed";
+      callbacks.current.onLanded?.(target);
     };
     m.skip = () => {
-      if (m.target && m.mode !== "landed") land();
+      if (!m.target || m.mode === "landed") return;
+      clearTimeout(m.timer);
+      cancelAnimationFrame(m.frame);
+      m.stop = list.length - 1;
+      land();
     };
-    if (reduced) {
-      // No spin; reveal on the next frame so state updates stay out of the effect.
-      if (target) m.frame = requestAnimationFrame(land);
-      return () => cancelAnimationFrame(m.frame);
-    }
     const planLanding = (now) => {
-      const final = restAngle(pool, m.target);
-      const delta = mod(final - m.angle, 360);
+      const delta = mod(angleOf(m.stop) - m.angle, 360);
       const travel =
         delta + 360 * Math.max(0, Math.ceil((LAND_TRAVEL - delta) / 360));
       // Ease-out cubic starting at cruise speed keeps the motion continuous.
@@ -163,8 +216,8 @@ export function SpinStage({
       };
       m.mode = "decel";
     };
-    const step = (now) => {
-      if (m.mode === "landed") return;
+    function step(now) {
+      if (m.mode === "landed" || m.mode === "between") return;
       const dt = Math.min(now - (m.last || now), 48);
       m.last = now;
       const before = m.angle;
@@ -199,12 +252,28 @@ export function SpinStage({
       m.kick *= Math.pow(0.84, dt / 16);
       paint();
       m.frame = requestAnimationFrame(step);
-    };
+    }
+    if (reduced) {
+      // No spin; reveal everything on the next frame (state stays out of the effect).
+      if (target)
+        m.frame = requestAnimationFrame(() => {
+          m.stop = list.length - 1;
+          m.angle = angleOf(m.stop);
+          paint();
+          show(list.length);
+          m.mode = "landed";
+          callbacks.current.onLanded?.(target);
+        });
+      return () => cancelAnimationFrame(m.frame);
+    }
     if (m.mode !== "landed") {
       m.last = 0;
       m.frame = requestAnimationFrame(step);
     } else paint();
-    return () => cancelAnimationFrame(m.frame);
+    return () => {
+      cancelAnimationFrame(m.frame);
+      clearTimeout(m.timer);
+    };
     // The show is keyed by the parent; only a new target restarts motion.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [target?.drawId]);
@@ -225,17 +294,18 @@ export function SpinStage({
 
   useEffect(() => {
     if (!landed) return undefined;
-    const timer = setTimeout(() => callbacks.current.onClose(), 4200);
+    const timer = setTimeout(() => callbacks.current.onClose(), double ? 5200 : 4200);
     return () => clearTimeout(timer);
-  }, [landed]);
+  }, [landed, double]);
 
   const tap = () => {
     if (landed) callbacks.current.onClose();
     else motion.current?.skip?.();
   };
+  const glow = current ? tierClass(current) : "";
   return (
     <div
-      className={`vr-stage ${landed ? "is-landed" : "is-spinning"}`}
+      className={`vr-stage ${landed ? "is-landed" : "is-spinning"} ${revealed.length ? `is-revealed ${glow}` : ""}`}
       role="dialog"
       aria-modal="true"
       aria-label="轮盘抽取"
@@ -262,30 +332,40 @@ export function SpinStage({
             {sound ? "音效 开" : "音效 关"}
           </button>
         </div>
+        {double && <p className="vr-stage-banner vr-stage-top-banner">👑 榜一制裁 · 本回合两个效果</p>}
         {banner && <p className="vr-stage-banner">{banner}</p>}
         <div className="vr-stage-wheel">
-          <div className="vr-burst" aria-hidden="true" />
+          <div className="vr-burst" key={revealed.length} aria-hidden="true" />
           <div className="vr-stage-pointer" ref={pointerRef} aria-hidden="true" />
           <div
             className="vr-stage-face"
             ref={wheelRef}
             style={{ transform: `rotate(${initialAngle}deg)` }}
           >
-            <WheelFace pool={pool} hit={landed ? hit : -1} />
+            <WheelFace pool={pool} hit={hit} />
           </div>
           <div className="vr-stage-hub" aria-hidden="true">
             S&S
           </div>
         </div>
         <div className="vr-stage-result" aria-live="assertive">
-          {landed && target ? (
-            <>
-              <span>你的效果</span>
-              <strong key={target.drawId}>{target.event.name}</strong>
-            </>
-          ) : (
+          {revealed.length > 0 && <span>{double ? "你的效果 ×2" : "你的效果"}</span>}
+          {revealed.map((event, i) => (
+            <strong
+              key={`${target.drawId}:${i}`}
+              className={`${tierClass(event)} ${double ? "is-double" : ""}`}
+            >
+              <i className="vr-tier-badge">{TIERS[tierOf(event)].label}</i>
+              {event.name}
+            </strong>
+          ))}
+          {!landed && (
             <span className="vr-stage-rolling">
-              {target ? "命运正在减速…" : "命运转动中…"}
+              {revealed.length
+                ? "第二个效果转动中…"
+                : target
+                  ? "命运正在减速…"
+                  : "命运转动中…"}
             </span>
           )}
         </div>
@@ -294,7 +374,11 @@ export function SpinStage({
             {teammates.map((x) => (
               <li key={x.memberId}>
                 <span>{x.nickname}</span>
-                <b>{x.event.name}</b>
+                <b>
+                  {effectsOf(x).map((e) => (
+                    <EffectName key={e.id} event={e} small />
+                  ))}
+                </b>
               </li>
             ))}
           </ul>
@@ -310,7 +394,13 @@ export function SpinStage({
         >
           {landed ? "收下效果" : target ? "跳过动画" : "抽取中…"}
         </button>
-        {landed && <div className="vr-stage-timer" aria-hidden="true" />}
+        {landed && (
+          <div
+            className="vr-stage-timer"
+            style={{ animationDuration: double ? "5.2s" : "4.2s" }}
+            aria-hidden="true"
+          />
+        )}
       </div>
     </div>
   );

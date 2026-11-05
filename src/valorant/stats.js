@@ -34,6 +34,10 @@ export function computeStats(summary, records = []) {
         streak: 0,
         bestStreak: 0,
         events: new Map(),
+        tiers: { white: 0, purple: 0, gold: 0 },
+        goldWins: 0,
+        tops: 0,
+        topWins: 0,
       });
     return players.get(effect.memberId);
   };
@@ -46,17 +50,30 @@ export function computeStats(summary, records = []) {
       p.wins += won ? 1 : 0;
       p.streak = won ? p.streak + 1 : 0;
       p.bestStreak = Math.max(p.bestStreak, p.streak);
-      const name = effect.event.name;
-      p.events.set(name, (p.events.get(name) || 0) + 1);
-      const e = events.get(effect.event.id) || {
-        id: effect.event.id,
-        name,
-        appearances: 0,
-        wins: 0,
-      };
-      e.appearances++;
-      e.wins += won ? 1 : 0;
-      events.set(effect.event.id, e);
+      if (round.top && round.top === effect.memberId) {
+        p.tops++;
+        p.topWins += won ? 1 : 0;
+      }
+      // A sanctioned top player carries two effects in one round.
+      const carried = [effect.event, effect.extra].filter(Boolean);
+      let gold = false;
+      for (const event of carried) {
+        const tier = ["white", "purple", "gold"].includes(event.tier) ? event.tier : "white";
+        p.tiers[tier]++;
+        gold ||= tier === "gold";
+        p.events.set(event.name, (p.events.get(event.name) || 0) + 1);
+        const e = events.get(event.id) || {
+          id: event.id,
+          name: event.name,
+          tier: event.tier,
+          appearances: 0,
+          wins: 0,
+        };
+        e.appearances++;
+        e.wins += won ? 1 : 0;
+        events.set(event.id, e);
+      }
+      if (gold && won) p.goldWins++;
     }
   // Personal redraws come from the log (it also covers an unrecorded last round).
   const spins = new Map();
@@ -89,6 +106,10 @@ export function computeStats(summary, records = []) {
         rerolls: p.rerolls,
         distinct: p.events.size,
         bestStreak: p.bestStreak,
+        tiers: p.tiers,
+        goldWins: p.goldWins,
+        tops: p.tops,
+        topWins: p.topWins,
         favorite,
         favoriteCount,
       };
@@ -131,6 +152,23 @@ export function computeStats(summary, records = []) {
         fate.length === 1
           ? `${fate[0].favoriteCount} 次带着「${fate[0].favorite}」上场`
           : `同一效果上场 ${fate[0].favoriteCount} 次`,
+      );
+    const hard = leaders(playerList, (p) => p.tiers.gold, { min: 2 });
+    if (hard.length)
+      add("gold", "💎", "金色硬汉", hard, `扛下 ${hard[0].tiers.gold} 个金色效果`);
+    const clutch = leaders(playerList, (p) => p.goldWins, { min: 1 });
+    if (clutch.length)
+      add("clutch", "🦾", "逆境之王", clutch, `带着金色效果赢下 ${clutch[0].goldWins} 回合`);
+    const sanctioned = leaders(playerList, (p) => p.tops, { min: 1 });
+    if (sanctioned.length)
+      add(
+        "top",
+        "⚖️",
+        "制裁之王",
+        sanctioned,
+        sanctioned.length === 1 && sanctioned[0].topWins
+          ? `当了 ${sanctioned[0].tops} 回榜一，顶着双效果赢下 ${sanctioned[0].topWins} 回`
+          : `当了 ${sanctioned[0].tops} 回榜一，扛着双效果上场`,
       );
     const variety = leaders(playerList, (p) => p.distinct, { min: 3 });
     if (variety.length)

@@ -1,9 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
   applyCommand,
+  isPistol,
   joinRoom,
   makeRoom,
+  nextBalance,
+  odds,
   roomView,
+  tierWeight,
+  visibleLogResults,
   RETENTION_MS,
   type Command,
   type Room,
@@ -21,14 +26,20 @@ function fixture() {
   referee.referee = true;
   return { room, host, enemy, referee };
 }
-const command = (room: Room, id: string, cmd: Command, now = NOW + 2000) =>
+const command = (
+  room: Room,
+  id: string,
+  cmd: Command,
+  now = NOW + 2000,
+  pick: (max: number) => number = () => 0,
+) =>
   applyCommand(
     room,
     room.members.find((m) => m.id === id)!,
     cmd,
     now,
     NOW,
-    () => 0,
+    pick,
   );
 
 describe("valorant room boundaries", () => {
@@ -36,7 +47,11 @@ describe("valorant room boundaries", () => {
     expect(EVENTS).toHaveLength(27);
     expect(new Set(EVENTS.map((e) => e.id)).size).toBe(27);
     expect(
-      EVENTS.every((event) => Object.keys(event).join(",") === "id,name"),
+      EVENTS.every(
+        (event) =>
+          ["white", "purple", "gold"].includes(event.tier) &&
+          Object.keys(event).every((k) => ["id", "name", "tier", "pistol"].includes(k)),
+      ),
     ).toBe(true);
   });
   it("counts all roles toward 13 seats and prevents a fourteenth join", () => {
@@ -227,14 +242,21 @@ describe("valorant room boundaries", () => {
     ]);
     expect(roomView(room, host, {}, NOW).score).toEqual({ left: 1, right: 1 });
   });
-  it("hides opponents' round effects but publishes winners during play", () => {
-    const { room, host, enemy, referee } = fixture();
+  it("reveals every effect of a decided round but keeps the current round secret", () => {
+    const { room, host, enemy } = fixture();
     command(room, host.id, { action: "start" });
-    command(room, host.id, { action: "nextRound", winner: "left" });
+    const first = command(room, host.id, { action: "nextRound", winner: "left" });
     const view = roomView(room, enemy, {}, NOW);
     expect(view.rounds[0].winner).toBe("left");
-    expect(view.rounds[0].effects.map((x) => x.memberId)).toEqual([enemy.id]);
-    expect(roomView(room, referee, {}, NOW).rounds[0].effects).toHaveLength(2);
+    expect(view.rounds[0].effects.map((x) => x.memberId).sort()).toEqual(
+      [host.id, enemy.id].sort(),
+    );
+    expect(view.results.map((x) => x.memberId)).toEqual([enemy.id]);
+    // Round 1 draws are public in the log; the round 2 draws are not yet.
+    const round1 = { round: 1, results: room.rounds![0].effects as never };
+    expect(visibleLogResults(room, enemy, round1, false)).toHaveLength(2);
+    expect(visibleLogResults(room, enemy, first!, false)).toHaveLength(1);
+    expect(visibleLogResults(room, enemy, first!, true)).toHaveLength(2);
   });
   it("ending without a winner leaves the abandoned round out of the record", () => {
     const { room, host } = fixture();
@@ -290,5 +312,132 @@ describe("valorant room boundaries", () => {
     command(room, host.id, { action: "spin" }, NOW + 4000);
     command(room, host.id, { action: "nextRound", winner: "left" }, NOW + 6000);
     expect(room.rounds).toHaveLength(1);
+  });
+  it("places pistol rounds by mode", () => {
+    expect([1, 2, 12, 13, 25].map((x) => isPistol("standard", x))).toEqual([
+      true, false, false, true, false,
+    ]);
+    expect([1, 4, 5, 6, 13].map((x) => isPistol("rapid", x))).toEqual([
+      true, false, true, false, false,
+    ]);
+    expect(isPistol(undefined, 13)).toBe(true);
+  });
+  it("never draws a non-pistol effect in a pistol round", () => {
+    const { room, host } = fixture();
+    command(room, host.id, { action: "settings", mode: "rapid" });
+    command(room, host.id, { action: "start" });
+    room.pool = [
+      { id: "gun", name: "只能用狙", tier: "white", pistol: false },
+      { id: "ok", name: "全程静步", tier: "white" },
+    ];
+    command(room, host.id, { action: "spinAll" }, NOW + 4000);
+    expect(room.results.every((x) => x.event.id === "ok")).toBe(true);
+    for (const t of [6000, 8000, 10000])
+      command(room, host.id, { action: "nextRound", winner: "left" }, NOW + t);
+    expect(room.round).toBe(4);
+    expect(room.results.every((x) => x.event.id === "gun")).toBe(true);
+    command(room, host.id, { action: "nextRound", winner: "left" }, NOW + 12000);
+    expect(room.round).toBe(5);
+    expect(room.results.every((x) => x.event.id === "ok")).toBe(true);
+    expect(room.rounds!.map((x) => !!x.pistol)).toEqual([true, false, false, false]);
+    expect(roomView(room, host, {}, NOW).pistol).toBe(true);
+  });
+  it("settings change only the fields sent", () => {
+    const { room, host, enemy } = fixture();
+    command(room, host.id, { action: "settings", unified: true });
+    command(room, host.id, { action: "settings", mode: "rapid" });
+    command(room, host.id, { action: "settings", sanction: true });
+    expect([room.unified, room.mode, room.sanction]).toEqual([true, "rapid", true]);
+    expect(() =>
+      command(room, enemy.id, { action: "settings", mode: "standard" }),
+    ).toThrow("只有房主");
+    expect(() =>
+      command(room, host.id, { action: "settings", mode: "x" as never }),
+    ).toThrow("有效模式");
+  });
+  it("shifts difficulty weights after each draw", () => {
+    expect([nextBalance(0, "white"), nextBalance(0, "gold"), nextBalance(0, "purple")]).toEqual([1, -1, 0]);
+    expect(nextBalance(3, "white")).toBe(3);
+    expect(nextBalance(-2, "purple")).toBe(-1);
+    expect(tierWeight("gold", 1)).toBe(1.5);
+    expect(tierWeight("white", -2)).toBe(2);
+    expect(tierWeight("purple", 3)).toBe(1);
+    const pool = EVENTS;
+    const even = odds(pool, 0, false);
+    const afterWhite = odds(pool, 1, false);
+    const afterGold = odds(pool, -1, false);
+    expect(afterWhite.gold).toBeGreaterThan(even.gold);
+    expect(afterGold.white).toBeGreaterThan(even.white);
+    const { room, host } = fixture();
+    command(room, host.id, { action: "start" });
+    room.pool = [
+      { id: "w", name: "白", tier: "white" },
+      { id: "g", name: "金", tier: "gold" },
+    ];
+    // White then the weighted roll: weights are 100 (white) and 150 (gold).
+    command(room, host.id, { action: "spin" }, NOW + 4000);
+    expect(room.balance![host.id]).toBe(1);
+    let total = 0;
+    command(room, host.id, { action: "spin" }, NOW + 6000, (max) => {
+      total = max;
+      return 100;
+    });
+    expect(total).toBe(250);
+    expect(room.results.find((x) => x.memberId === host.id)?.event.id).toBe("g");
+    expect(room.balance![host.id]).toBe(0);
+    expect(roomView(room, host, {}, NOW).odds).toEqual({ white: 50, purple: 0, gold: 50 });
+  });
+  it("sanction mode gives the chosen top player two distinct effects for one round", () => {
+    const { room, host, enemy, referee } = fixture();
+    command(room, host.id, { action: "settings", sanction: true });
+    command(room, host.id, { action: "start" });
+    expect(room.results.every((x) => !x.extra)).toBe(true);
+    expect(() =>
+      command(room, host.id, { action: "nextRound", winner: "left", top: referee.id }),
+    ).toThrow("参赛玩家");
+    command(room, host.id, { action: "nextRound", winner: "left", top: enemy.id });
+    expect(room.top).toBe(enemy.id);
+    const sanctioned = room.results.find((x) => x.memberId === enemy.id)!;
+    expect(sanctioned.extra).toBeDefined();
+    expect(sanctioned.extra!.id).not.toBe(sanctioned.event.id);
+    expect(room.results.find((x) => x.memberId === host.id)?.extra).toBeUndefined();
+    // Redraws keep the double effect for the round.
+    command(room, enemy.id, { action: "spin" }, NOW + 5000);
+    expect(room.results.find((x) => x.memberId === enemy.id)?.extra).toBeDefined();
+    // A referee's suggestion is used when the host does not override it.
+    command(room, referee.id, { action: "top", targetId: host.id }, NOW + 6000);
+    expect(roomView(room, referee, {}, NOW).nextTop).toBe(host.id);
+    expect(roomView(room, enemy, {}, NOW).nextTop).toBeNull();
+    command(room, host.id, { action: "nextRound", winner: "right" }, NOW + 7000);
+    expect(room.top).toBe(host.id);
+    expect(room.nextTop).toBeNull();
+    expect(room.rounds!.map((x) => x.top)).toEqual([null, enemy.id]);
+    expect(room.rounds![1].effects.find((x) => x.memberId === enemy.id)?.extra).toBeDefined();
+    // Choosing nobody leaves the next round without a top player.
+    command(room, host.id, { action: "nextRound", winner: "right", top: null }, NOW + 8000);
+    expect(room.top).toBeNull();
+    expect(room.results.every((x) => !x.extra)).toBe(true);
+  });
+  it("ignores top picks when sanction mode is off", () => {
+    const { room, host, enemy, referee } = fixture();
+    command(room, host.id, { action: "start" });
+    command(room, host.id, { action: "nextRound", winner: "left", top: enemy.id });
+    expect(room.top).toBeNull();
+    expect(room.results.every((x) => !x.extra)).toBe(true);
+    expect(() =>
+      command(room, referee.id, { action: "top", targetId: enemy.id }),
+    ).toThrow("未开启");
+  });
+  it("resets modes' per-game state on a new game", () => {
+    const { room, host, enemy } = fixture();
+    command(room, host.id, { action: "settings", sanction: true });
+    command(room, host.id, { action: "start" });
+    command(room, host.id, { action: "nextRound", winner: "left", top: enemy.id });
+    command(room, host.id, { action: "end", winner: "left" });
+    command(room, host.id, { action: "reset" });
+    command(room, host.id, { action: "start" });
+    expect([room.top, room.nextTop]).toEqual([null, null]);
+    expect(Object.keys(room.balance!).length).toBe(2);
+    expect(room.results.every((x) => !x.extra)).toBe(true);
   });
 });
