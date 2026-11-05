@@ -90,10 +90,20 @@ room = await post(host, "nextRound", {
 });
 assert.equal(room.round, 2);
 assert.deepEqual(room.score, { left: 0, right: 1 });
-assert.equal(room.rounds[0].effects.length, 1);
+// A decided round is public: both teams' effects are visible to everyone.
+assert.equal(room.rounds[0].effects.length, 2);
 await post(host, "nextRound", { winner: "left", ...roundRef, version: room.version }, 409);
 const history = (await get(host, { view: "history", gameId })).data;
-assert(history.every((log) => log.results.every((r) => r.memberId === hostId)));
+// Earlier rounds are public; the current round still hides the opponents.
+assert(
+  history
+    .filter((log) => log.round === room.round)
+    .every((log) => log.results.every((r) => r.memberId === hostId)),
+);
+assert(history.some((log) => log.round < room.round && log.results.some((r) => r.memberId === enemyId)));
+const pool = (await get(token(), { view: "pool" })).data;
+assert.equal(pool.events.length, 27);
+assert(pool.events.every((e) => ["white", "purple", "gold"].includes(e.tier)));
 await post(
   host,
   "recover",

@@ -11,13 +11,23 @@ function jitter(seed) {
   for (const ch of seed || "") h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
   return ((h >>> 0) / 4294967295 - 0.5) * 0.62;
 }
-export function restAngle(pool, result) {
+// Effects of one draw in reveal order; a sanctioned top player has two.
+export const effectsOf = (result) =>
+  result ? [result.event, result.extra].filter(Boolean) : [];
+// Each stop has its own seed; the first keeps the draw id so angles stay stable.
+const seedOf = (drawId, stop) => (stop ? `${drawId}:${stop}` : drawId);
+export function stopAngle(pool, event, drawId, stop = 0) {
   const n = pool.length || 1;
   const index = Math.max(
     0,
-    pool.findIndex((x) => x.id === result?.event.id),
+    pool.findIndex((x) => x.id === event?.id),
   );
-  return mod(-(index + 0.5 + jitter(result?.drawId)) * (360 / n), 360);
+  return mod(-(index + 0.5 + jitter(seedOf(drawId, stop))) * (360 / n), 360);
+}
+// Resting angle after the whole draw, i.e. at its last effect.
+export function restAngle(pool, result) {
+  const list = effectsOf(result);
+  return stopAngle(pool, list.at(-1), result?.drawId, Math.max(0, list.length - 1));
 }
 
 let audioContext;

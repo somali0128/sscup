@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { actionNames, downloadHistory, request, teamLabel } from "./api";
 import { computeStats } from "./stats";
+import { EffectName } from "./Wheel";
+import { effectsOf } from "./wheel-utils";
 
 const date = (at) => new Date(at).toLocaleString("zh-CN", { hour12: false });
 
@@ -37,6 +39,7 @@ export function Score({ score, compact = false }) {
 }
 
 export function RoundTimeline({ rounds, canAmend, onAmend, limit }) {
+  const topName = (r) => r.top && r.effects.find((x) => x.memberId === r.top)?.nickname;
   const list = [...rounds].sort((a, b) => b.round - a.round);
   const shown = limit ? list.slice(0, limit) : list;
   let left = 0;
@@ -61,6 +64,8 @@ export function RoundTimeline({ rounds, canAmend, onAmend, limit }) {
               {r.winner ? `${teamLabel(r.winner)}胜` : "未记录"}
             </span>
             <span className="vr-muted">{running.get(r.round)}</span>
+            {r.pistol && <span className="vr-tag vr-tag-pistol">手枪局</span>}
+            {topName(r) && <span className="vr-tag vr-tag-top">👑 {topName(r)}</span>}
             {r.amendedAt && <span className="vr-tag">已修正</span>}
             {canAmend && r.winner && (
               <button
@@ -80,7 +85,9 @@ export function RoundTimeline({ rounds, canAmend, onAmend, limit }) {
                   className={x.team === r.winner ? "is-win" : undefined}
                 >
                   <span>{x.nickname}</span>
-                  {x.event.name}
+                  {effectsOf(x).map((e) => (
+                    <EffectName key={e.id} event={e} small />
+                  ))}
                 </li>
               ))}
             </ul>
@@ -146,7 +153,7 @@ function Analysis({ stats, ended }) {
               <th scope="col">胜/回合</th>
               <th scope="col">胜率</th>
               <th scope="col">重抽</th>
-              <th scope="col">效果</th>
+              <th scope="col" title="白 / 紫 / 金">难度</th>
             </tr>
           </thead>
           <tbody>
@@ -160,7 +167,11 @@ function Analysis({ stats, ended }) {
                 </td>
                 <td>{p.winRate}%</td>
                 <td>{p.rerolls}</td>
-                <td>{p.distinct}</td>
+                <td className="vr-tier-mix">
+                  <i className="vr-tier-white">{p.tiers.white}</i>/
+                  <i className="vr-tier-purple">{p.tiers.purple}</i>/
+                  <i className="vr-tier-gold">{p.tiers.gold}</i>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -178,7 +189,7 @@ function Analysis({ stats, ended }) {
       <ul className="vr-bars">
         {stats.events.map((e) => (
           <li key={e.id}>
-            <span>{e.name}</span>
+            <EffectName event={e} small />
             <span className="vr-bar" aria-hidden="true">
               <i style={{ width: `${e.winRate}%` }} />
             </span>
@@ -190,7 +201,7 @@ function Analysis({ stats, ended }) {
       </ul>
       {!ended && (
         <p className="vr-caption">
-          进行中仅统计你有权查看的效果；结束后公开全部数据。
+          统计已确认胜负的回合；进行中的回合不计入。
         </p>
       )}
     </>
@@ -364,7 +375,9 @@ export default function Records({ session, room, onAmend }) {
                       {row.results.map((result) => (
                         <p key={result.memberId}>
                           <b>{result.nickname}</b> / {teamLabel(result.team)}：
-                          {result.event.name}
+                          {effectsOf(result).map((e) => (
+                            <EffectName key={e.id} event={e} small />
+                          ))}
                         </p>
                       ))}
                     </li>

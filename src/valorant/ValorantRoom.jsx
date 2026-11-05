@@ -9,16 +9,22 @@ import {
   teamLabel,
 } from "./api";
 import Entry from "./Entry";
+import FreeWheel from "./FreeWheel";
 import Records, { RoundTimeline, Score } from "./Records";
-import { MiniWheel, SpinStage } from "./Wheel";
-import { restAngle, unlockAudio } from "./wheel-utils";
+import { TIERS, tierClass } from "./tiers";
+import { EffectName, MiniWheel, SpinStage } from "./Wheel";
+import { effectsOf, restAngle, unlockAudio } from "./wheel-utils";
 import "./valorant.css";
 
 const teamName = (team) => teamLabel(team) || "裁判 / 等待席";
 const other = (team) => (team === "left" ? "right" : "left");
 // Round-scoped actions are validated by game and round on the server, so other
 // players' personal redraws cannot make the host's confirmation stale.
-const ROUND_SCOPED = new Set(["spin", "spinAll", "nextRound", "end"]);
+const ROUND_SCOPED = new Set(["spin", "spinAll", "nextRound", "end", "top"]);
+const MODES = {
+  standard: { label: "标准模式", pistol: "第 1、13 回合为手枪局" },
+  rapid: { label: "极速模式", pistol: "第 1、5 回合为手枪局" },
+};
 
 function readSeen() {
   try {
@@ -64,30 +70,77 @@ function Dialog({ title, children, onClose }) {
   );
 }
 
+function EventPool({ pool }) {
+  return (
+    <>
+      <p className="vr-muted">
+        按难度分为白 / 紫 / 金。初始各效果概率相同；抽到白色后金色概率提高，抽到金色后白色概率提高。
+        标 🔫 的效果不会出现在手枪局。
+      </p>
+      {Object.entries(TIERS).map(([tier, t]) => {
+        const list = pool.filter((e) => (e.tier || "white") === tier);
+        if (!list.length) return null;
+        return (
+          <div key={tier} className="vr-pool-group">
+            <h3 className={`vr-subhead vr-tier-${tier}`}>
+              <i className="vr-tier-badge">{t.label}</i> {t.name} · {list.length}
+            </h3>
+            <ul className="vr-event-list">
+              {list.map((event) => (
+                <li key={event.id} className={`vr-tier-${tier}`}>
+                  {event.name}
+                  {event.pistol === false && <small title="手枪局不会抽到"> 🔫✕</small>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
 function ConfirmDialog({ confirm, busy, onConfirm, onClose }) {
-  const [choice, setChoice] = useState(confirm.initial);
-  const picked = !confirm.choices || choice !== undefined;
-  const chosen = confirm.choices?.find((c) => c.value === choice);
+  const groups =
+    confirm.groups ||
+    (confirm.choices
+      ? [{ key: confirm.choiceKey, choices: confirm.choices, initial: confirm.initial }]
+      : []);
+  const [values, setValues] = useState(() =>
+    Object.fromEntries(groups.map((g) => [g.key, g.initial])),
+  );
+  const picked = groups.every((g) => values[g.key] !== undefined);
   return (
     <Dialog title={confirm.title} onClose={onClose}>
       {confirm.text && <p className="vr-muted">{confirm.text}</p>}
-      {confirm.choices && (
-        <div className="vr-choice" role="radiogroup" aria-label={confirm.title}>
-          {confirm.choices.map((c) => (
-            <button
-              type="button"
-              key={String(c.value)}
-              role="radio"
-              aria-checked={choice === c.value}
-              className={`vr-choice-${c.tone || "plain"}`}
-              onClick={() => setChoice(c.value)}
+      {groups.map((g) => {
+        const chosen = g.choices.find((c) => c.value === values[g.key]);
+        return (
+          <div key={g.key} className="vr-choice-group">
+            {g.label && <h3 className="vr-choice-label">{g.label}</h3>}
+            {g.hint && <p className="vr-caption vr-choice-hint">{g.hint}</p>}
+            <div
+              className={`vr-choice ${g.list ? "vr-choice-list" : ""}`}
+              role="radiogroup"
+              aria-label={g.label || confirm.title}
             >
-              {c.label}
-            </button>
-          ))}
-        </div>
-      )}
-      {chosen?.note && <p className="vr-dialog-note">{chosen.note}</p>}
+              {g.choices.map((c) => (
+                <button
+                  type="button"
+                  key={String(c.value)}
+                  role="radio"
+                  aria-checked={values[g.key] === c.value}
+                  className={`vr-choice-${c.tone || "plain"}`}
+                  onClick={() => setValues((v) => ({ ...v, [g.key]: c.value }))}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+            {chosen?.note && <p className="vr-dialog-note">{chosen.note}</p>}
+          </div>
+        );
+      })}
       <div className="vr-dialog-actions">
         <button type="button" onClick={onClose}>
           取消
@@ -96,20 +149,17 @@ function ConfirmDialog({ confirm, busy, onConfirm, onClose }) {
           type="button"
           className="vr-primary"
           disabled={busy || !picked}
-          onClick={() =>
-            onConfirm(
-              confirm.action,
-              confirm.choices
-                ? { ...confirm.extra, [confirm.choiceKey]: choice }
-                : confirm.extra,
-            )
-          }
+          onClick={() => onConfirm(confirm.action, { ...confirm.extra, ...values })}
         >
           {busy ? "正在提交…" : picked ? confirm.confirmLabel || "确认" : "请先选择"}
         </button>
       </div>
     </Dialog>
   );
+}
+
+function Effects({ result, small = true }) {
+  return effectsOf(result).map((e) => <EffectName key={e.id} event={e} small={small} />);
 }
 
 function TeamPanel({ room, me, team, mine, className = "" }) {
@@ -129,7 +179,11 @@ function TeamPanel({ room, me, team, mine, className = "" }) {
         </h2>
         <span>{total} / 5</span>
       </div>
-      {hidden && <p className="vr-muted vr-secret">对方效果保密，结束后公开。</p>}
+      {hidden && (
+        <p className="vr-muted vr-secret">
+          本回合对方效果保密，回合结算后可在「回合记录」查看。
+        </p>
+      )}
       <ul className="vr-roster">
         {members.map((m) => {
           const effect = room.results.find((x) => x.memberId === m.id);
@@ -141,11 +195,14 @@ function TeamPanel({ room, me, team, mine, className = "" }) {
                   {m.nickname}
                   {m.id === me.id && <em>你</em>}
                   {m.id === room.hostId && <em>房主</em>}
+                  {room.phase === "playing" && room.top === m.id && (
+                    <em className="vr-top-tag">👑 榜一</em>
+                  )}
                 </span>
               </span>
               {room.phase !== "lobby" && !hidden && (
                 <b key={effect?.drawId} className="vr-roster-effect vr-fx">
-                  {effect ? effect.event.name : "—"}
+                  {effect ? <Effects result={effect} /> : "—"}
                   {effect && room.rerolls[m.id] > 0 && room.phase === "playing" && (
                     <small>重抽 {room.rerolls[m.id]}</small>
                   )}
@@ -166,16 +223,24 @@ function TeamPanel({ room, me, team, mine, className = "" }) {
 
 function MyCard({ room, me, result, busy, onSpin, onReplay }) {
   const free = room.phase === "playing" && !room.unified;
+  const list = effectsOf(result);
+  const top = room.phase === "playing" && room.top === me.id;
   return (
-    <section className={`vr-me vr-me-${me.team}`}>
+    <section
+      className={`vr-me vr-me-${me.team} ${list.length ? tierClass(list.at(-1)) : ""} ${top ? "is-top" : ""}`}
+    >
       <div className="vr-me-text">
         <span className="vr-eyebrow">
           {room.phase === "ended" ? "本场最终效果" : `第 ${room.round} 回合 · 我的效果`}
           {" · "}
           {teamName(me.team)}
         </span>
-        <strong key={result?.drawId} className="vr-me-effect vr-fx">
-          {result?.event.name || "等待抽取"}
+        <div className="vr-me-badges">
+          {room.pistol && <span className="vr-pill vr-pill-pistol">🔫 手枪局</span>}
+          {top && <span className="vr-pill vr-pill-top">👑 榜一制裁 · 双效果</span>}
+        </div>
+        <strong key={result?.drawId} className={`vr-me-effect vr-fx ${list.length > 1 ? "is-double" : ""}`}>
+          {list.length ? <Effects result={result} small={false} /> : "等待抽取"}
         </strong>
         <span className="vr-me-sub">
           {room.phase === "ended"
@@ -186,6 +251,16 @@ function MyCard({ room, me, result, busy, onSpin, onReplay }) {
                 ? `本回合已重抽 ${room.rerolls[me.id]} 次`
                 : "自由抽取：可随时重抽"}
         </span>
+        {room.odds && (
+          <span className="vr-odds" title="下一次抽取各难度的概率">
+            下次：
+            {Object.keys(TIERS).map((t) => (
+              <i key={t} className={`vr-tier-${t}`}>
+                {TIERS[t].label} {room.odds[t]}%
+              </i>
+            ))}
+          </span>
+        )}
       </div>
       {result && (
         <MiniWheel
@@ -339,6 +414,18 @@ export default function ValorantRoom() {
   const [confirm, setConfirm] = useState(null);
   const [show, setShow] = useState(null);
   const [seen, setSeen] = useState(readSeen);
+  const [free, setFree] = useState(
+    () => new URLSearchParams(window.location.search).get("free") === "1",
+  );
+  function toggleFree(on) {
+    setFree(on);
+    setError("");
+    const url = new URL(window.location.href);
+    if (on) url.searchParams.set("free", "1");
+    else url.searchParams.delete("free");
+    window.history.replaceState(null, "", url);
+    window.scrollTo({ top: 0 });
+  }
   const [lastAngle, setLastAngle] = useState(0);
   const entryToken = useRef(null);
   const sessionRef = useRef(session);
@@ -548,14 +635,45 @@ export default function ValorantRoom() {
   function ask(c) {
     setConfirm(c);
   }
+  const players = room ? room.members.filter((m) => m.team) : [];
+  const topChoices = !room
+    ? []
+    : [
+    ...players.map((m) => ({
+      value: m.id,
+      label: `${m.nickname} · ${teamLabel(m.team)}`,
+      tone: m.team,
+      note: `${m.nickname} 在 R${room.round + 1} 获得两个效果，回合结束后解除。`,
+    })),
+    { value: null, label: "本回合不制裁", note: `R${room.round + 1} 不设榜一。` },
+  ];
+  const nextPistol = room
+    ? room.pistolRounds?.includes(room.round + 1) && room.phase === "playing"
+    : false;
   const decideRound = (winner) =>
     ask({
       title: `确认第 ${room.round} 回合胜负`,
-      text: `确认后记录本回合全员效果，进入第 ${room.round + 1} 回合并为所有玩家重新抽取。`,
+      text: `确认后记录本回合全员效果，进入第 ${room.round + 1} 回合并为所有玩家重新抽取。${
+        nextPistol ? `R${room.round + 1} 是手枪局，不会抽到需要买枪的效果。` : ""
+      }`,
       action: "nextRound",
-      choiceKey: "winner",
-      initial: winner,
-      choices: winnerChoices(room.round, room.score),
+      groups: [
+        { key: "winner", label: "本回合胜方", choices: winnerChoices(room.round, room.score), initial: winner },
+        ...(room.sanction
+          ? [
+              {
+                key: "top",
+                label: `R${room.round + 1} 榜一（双效果）`,
+                hint: room.nextTop
+                  ? `裁判推荐：${room.members.find((m) => m.id === room.nextTop)?.nickname}`
+                  : "选择本回合表现最好的玩家。",
+                list: true,
+                choices: topChoices,
+                initial: room.nextTop ?? undefined,
+              },
+            ]
+          : []),
+      ],
       confirmLabel: `确认 · 进入 R${room.round + 1}`,
     });
   const endGame = () =>
@@ -618,8 +736,10 @@ export default function ValorantRoom() {
             </button>
           </div>
         )}
-        {!session ? (
-          <Entry onEnter={enter} busy={busy} />
+        {!session && free ? (
+          <FreeWheel onExit={() => toggleFree(false)} />
+        ) : !session ? (
+          <Entry onEnter={enter} busy={busy} onFree={() => toggleFree(true)} />
         ) : !room ? (
           <section className="vr-panel">
             <h2>正在恢复房间 {session.code}</h2>
@@ -643,7 +763,7 @@ export default function ValorantRoom() {
                   {room.phase === "lobby"
                     ? "等待大厅"
                     : room.phase === "playing"
-                      ? `第 ${room.gameNumber} 场 · R${room.round}`
+                      ? `第 ${room.gameNumber} 场 · R${room.round}${room.pistol ? " · 手枪局" : ""}`
                       : `第 ${room.gameNumber} 场 · 已结束`}
                 </b>
                 {room.phase !== "lobby" ? (
@@ -694,14 +814,7 @@ export default function ValorantRoom() {
             ) : tab === "rules" ? (
               <section className="vr-panel">
                 <h2>本场事件池</h2>
-                <p className="vr-muted">
-                  等概率 · 允许重复 · 重新抽取替换原效果。所有约束由玩家在游戏内执行。
-                </p>
-                <ol className="vr-event-list">
-                  {room.pool.map((event) => (
-                    <li key={event.id}>{event.name}</li>
-                  ))}
-                </ol>
+                <EventPool pool={room.pool} />
               </section>
             ) : (
               <div className="vr-game-grid">
@@ -776,6 +889,7 @@ export default function ValorantRoom() {
                           双方效果实时显示在下方。
                           {host ? "本回合结束后在「回合结算」确认胜负。" : "回合胜负由房主确认。"}
                         </p>
+                        {room.pistol && <span className="vr-pill vr-pill-pistol">🔫 手枪局</span>}
                       </section>
                     )
                   )}
@@ -813,7 +927,10 @@ export default function ValorantRoom() {
                         <h2>回合结算 · R{room.round}</h2>
                         <Score score={room.score} compact />
                       </div>
-                      <p className="vr-muted">本回合打完后，选择胜方并确认，自动进入下一回合。</p>
+                      <p className="vr-muted">
+                        本回合打完后，选择胜方并确认，自动进入下一回合。
+                        {room.sanction && "开启了榜一制裁，确认时一并选择下回合榜一。"}
+                      </p>
                       <div className="vr-choice">
                         <button
                           type="button"
@@ -834,8 +951,73 @@ export default function ValorantRoom() {
                       </div>
                     </section>
                   )}
+                  {room.canManage && !host && room.sanction && room.phase === "playing" && (
+                    <section className="vr-panel vr-decide vr-o-control">
+                      <div className="vr-section-title">
+                        <h2>推荐 R{room.round + 1} 榜一</h2>
+                      </div>
+                      <p className="vr-muted">
+                        房主确认胜负时会默认采用你的推荐。
+                        {room.nextTop &&
+                          `当前推荐：${room.members.find((m) => m.id === room.nextTop)?.nickname}`}
+                      </p>
+                      <div className="vr-choice vr-choice-list">
+                        {players.map((m) => (
+                          <button
+                            type="button"
+                            key={m.id}
+                            role="radio"
+                            aria-checked={room.nextTop === m.id}
+                            className={`vr-choice-${m.team}`}
+                            disabled={busy}
+                            onClick={() =>
+                              act("top", room.nextTop === m.id ? {} : { targetId: m.id })
+                            }
+                          >
+                            {m.nickname}
+                          </button>
+                        ))}
+                      </div>
+                    </section>
+                  )}
                   <section className="vr-panel vr-o-manage">
                     <h2>房间设置</h2>
+                    <p className="vr-muted">
+                      {MODES[room.mode]?.label || MODES.standard.label} ·{" "}
+                      {MODES[room.mode]?.pistol || MODES.standard.pistol}
+                      {room.sanction && " · 榜一制裁已开启"}
+                    </p>
+                    {host && room.phase === "lobby" && (
+                      <>
+                        <div className="vr-choice vr-mode-choice" role="radiogroup" aria-label="比赛模式">
+                          {Object.entries(MODES).map(([id, m]) => (
+                            <button
+                              type="button"
+                              key={id}
+                              role="radio"
+                              aria-checked={room.mode === id}
+                              disabled={busy}
+                              onClick={() => room.mode !== id && act("settings", { mode: id })}
+                            >
+                              {m.label}
+                              <small>{m.pistol}</small>
+                            </button>
+                          ))}
+                        </div>
+                        <label className="vr-checkbox">
+                          <input
+                            type="checkbox"
+                            checked={room.sanction}
+                            disabled={busy}
+                            onChange={(e) => act("settings", { sanction: e.target.checked })}
+                          />
+                          <span className="vr-checkbox-text">
+                            开启榜一制裁模式
+                            <span>从第 2 回合起，每回合由房主 / 裁判选一名榜一，该玩家本回合获得两个效果。</span>
+                          </span>
+                        </label>
+                      </>
+                    )}
                     <p className="vr-muted">
                       {room.unified
                         ? "统一抽取：玩家等待房主或裁判操作。"

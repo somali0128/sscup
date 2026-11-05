@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { Db } from "mongodb";
 import { getDatabase } from "../lib/mongodb.js";
 import { allowMethods, withApi, sendError } from "../lib/http.js";
+import { EVENTS, EVENT_POOL_VERSION } from "../lib/valorant-events.js";
 import {
   applyCommand,
   ensure,
@@ -11,8 +12,8 @@ import {
   RETENTION_MS,
   RoomError,
   roomView,
+  visibleLogResults,
   visibleOutcome,
-  visibleResults,
   visibleRounds,
   score,
   type Room,
@@ -51,6 +52,7 @@ const bodySchema = z
       "remove",
       "recover",
       "amend",
+      "top",
     ]),
     code: codeSchema.optional(),
     nickname: nicknameSchema.optional(),
@@ -65,6 +67,9 @@ const bodySchema = z
     winner: z.enum(["left", "right"]).nullable().optional(),
     round: z.number().int().positive().optional(),
     gameId: z.string().uuid().optional(),
+    mode: z.enum(["standard", "rapid"]).optional(),
+    sanction: z.boolean().optional(),
+    top: z.string().uuid().nullable().optional(),
   })
   .strict();
 type Game = {
@@ -79,7 +84,7 @@ type Game = {
 };
 // Round-scoped actions only need the same game and round, so concurrent
 // personal redraws by other players do not reject the host's confirmation.
-const ROUND_SCOPED = new Set(["spin", "spinAll", "nextRound", "end"]);
+const ROUND_SCOPED = new Set(["spin", "spinAll", "nextRound", "end", "top"]);
 let indexes: Promise<unknown> | undefined;
 function init(db: Db) {
   if (!indexes)
@@ -174,6 +179,11 @@ export default withApi(async (req, res) => {
       req.headers.authorization?.replace(/^Bearer\s+/i, ""),
     );
     const tokenHash = hash(token);
+    // The event pool is public: the room-free wheel reads it without a room.
+    if (req.method === "GET" && req.query.view === "pool")
+      return res.json({
+        data: { version: EVENT_POOL_VERSION, events: EVENTS },
+      });
     const db = await getDatabase();
     await init(db);
     const rooms = db.collection<Room>("valorant_rooms");
@@ -266,9 +276,12 @@ export default withApi(async (req, res) => {
               at,
               actor,
               action,
-              results: game.endedAt
-                ? results
-                : visibleResults(room, me, results),
+              results: visibleLogResults(
+                room,
+                me,
+                { round, results },
+                !!game.endedAt,
+              ),
               outcome: game.endedAt
                 ? outcome
                 : visibleOutcome(room, me, outcome),
