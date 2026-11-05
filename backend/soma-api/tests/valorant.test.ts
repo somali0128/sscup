@@ -140,7 +140,7 @@ describe("valorant room boundaries", () => {
     const { room, host } = fixture();
     command(room, host.id, { action: "start" });
     const id = room.results[0].drawId;
-    const log = command(room, host.id, { action: "nextRound" });
+    const log = command(room, host.id, { action: "nextRound", winner: "left" });
     expect(room.round).toBe(2);
     expect(room.results[0].drawId).not.toBe(id);
     expect(log?.results).toHaveLength(2);
@@ -174,7 +174,10 @@ describe("valorant room boundaries", () => {
     const { room, host, referee } = fixture();
     command(room, host.id, { action: "start" });
     const firstGame = room.gameId;
-    const ended = command(room, referee.id, { action: "end" }, NOW + 5000);
+    expect(() =>
+      command(room, referee.id, { action: "end" }, NOW + 5000),
+    ).toThrow("只有房主");
+    const ended = command(room, host.id, { action: "end" }, NOW + 5000);
     expect(ended?.expiresAt.getTime()).toBe(NOW + 5000 + RETENTION_MS);
     expect(roomView(room, host, {}, NOW).results).toHaveLength(2);
     expect(() => command(room, host.id, { action: "spin" })).toThrow(
@@ -185,5 +188,107 @@ describe("valorant room boundaries", () => {
     command(room, host.id, { action: "start" });
     expect(room.gameId).not.toBe(firstGame);
     expect(room.gameNumber).toBe(2);
+  });
+  it("only the host confirms a round, and a winner is required", () => {
+    const { room, host, referee } = fixture();
+    command(room, host.id, { action: "start" });
+    expect(() => command(room, host.id, { action: "nextRound" })).toThrow(
+      "胜方",
+    );
+    expect(() =>
+      command(room, referee.id, { action: "nextRound", winner: "left" }),
+    ).toThrow("只有房主");
+    expect(room.round).toBe(1);
+    expect(room.rounds).toEqual([]);
+  });
+  it("records each round's final effects, rerolls and winner for analysis", () => {
+    const { room, host, enemy } = fixture();
+    command(room, host.id, { action: "start" });
+    command(room, host.id, { action: "spin" }, NOW + 4000);
+    command(room, host.id, { action: "spin" }, NOW + 6000);
+    const log = command(
+      room,
+      host.id,
+      { action: "nextRound", winner: "right" },
+      NOW + 8000,
+    );
+    expect(log?.outcome?.round).toBe(1);
+    expect(log?.outcome?.winner).toBe("right");
+    expect(room.rounds).toHaveLength(1);
+    const effects = room.rounds![0].effects;
+    expect(effects.find((x) => x.memberId === host.id)?.rerolls).toBe(2);
+    expect(effects.find((x) => x.memberId === enemy.id)?.rerolls).toBe(0);
+    expect(effects.every((x) => x.event.id === EVENTS[0].id)).toBe(true);
+    expect(room.rerolls).toEqual({});
+    command(room, host.id, { action: "end", winner: "left" }, NOW + 9000);
+    expect(room.rounds!.map((x) => [x.round, x.winner])).toEqual([
+      [1, "right"],
+      [2, "left"],
+    ]);
+    expect(roomView(room, host, {}, NOW).score).toEqual({ left: 1, right: 1 });
+  });
+  it("hides opponents' round effects but publishes winners during play", () => {
+    const { room, host, enemy, referee } = fixture();
+    command(room, host.id, { action: "start" });
+    command(room, host.id, { action: "nextRound", winner: "left" });
+    const view = roomView(room, enemy, {}, NOW);
+    expect(view.rounds[0].winner).toBe("left");
+    expect(view.rounds[0].effects.map((x) => x.memberId)).toEqual([enemy.id]);
+    expect(roomView(room, referee, {}, NOW).rounds[0].effects).toHaveLength(2);
+  });
+  it("ending without a winner leaves the abandoned round out of the record", () => {
+    const { room, host } = fixture();
+    command(room, host.id, { action: "start" });
+    const log = command(room, host.id, { action: "end", winner: null });
+    expect(log?.outcome).toBeUndefined();
+    expect(room.rounds).toEqual([]);
+    expect(room.phase).toBe("ended");
+  });
+  it("lets the host amend a recorded winner, including after the end", () => {
+    const { room, host, referee } = fixture();
+    command(room, host.id, { action: "start" });
+    command(room, host.id, { action: "nextRound", winner: "left" });
+    expect(() =>
+      command(room, referee.id, { action: "amend", round: 1, winner: "right" }),
+    ).toThrow("只有房主");
+    expect(() =>
+      command(room, host.id, { action: "amend", round: 2, winner: "right" }),
+    ).toThrow("找不到");
+    command(room, host.id, { action: "end" }, NOW + 5000);
+    const expiry = room.expiresAt.getTime();
+    const log = command(
+      room,
+      host.id,
+      { action: "amend", round: 1, winner: "right" },
+      NOW + 9000,
+    );
+    expect(log?.outcome).toMatchObject({ round: 1, winner: "right", previous: "left" });
+    expect(log?.expiresAt.getTime()).toBe(expiry);
+    expect(room.expiresAt.getTime()).toBe(expiry);
+    expect(room.rounds![0].winner).toBe("right");
+    command(room, host.id, { action: "reset" });
+    expect(() =>
+      command(room, host.id, { action: "amend", round: 1, winner: "left" }),
+    ).toThrow("没有可修正");
+  });
+  it("starts every game with an empty round record", () => {
+    const { room, host } = fixture();
+    command(room, host.id, { action: "start" });
+    command(room, host.id, { action: "nextRound", winner: "left" });
+    command(room, host.id, { action: "end", winner: "left" });
+    command(room, host.id, { action: "reset" });
+    command(room, host.id, { action: "start" });
+    expect(room.rounds).toEqual([]);
+    expect(room.round).toBe(1);
+  });
+  it("tolerates rooms stored before round records existed", () => {
+    const { room, host } = fixture();
+    command(room, host.id, { action: "start" });
+    delete room.rounds;
+    delete room.rerolls;
+    expect(roomView(room, host, {}, NOW).rounds).toEqual([]);
+    command(room, host.id, { action: "spin" }, NOW + 4000);
+    command(room, host.id, { action: "nextRound", winner: "left" }, NOW + 6000);
+    expect(room.rounds).toHaveLength(1);
   });
 });

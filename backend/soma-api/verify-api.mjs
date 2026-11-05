@@ -77,9 +77,21 @@ const same = await post(ref, "spinAll", {
 });
 assert.equal(same.version, room.version);
 assert.equal(new Set(room.results.map((r) => r.drawId)).size, 1);
-const stale = room.version;
-room = await post(ref, "nextRound", { version: stale });
-await post(ref, "nextRound", { version: stale }, 409);
+await post(ref, "nextRound", { winner: "left", version: room.version }, 403);
+await post(host, "nextRound", { version: room.version }, 400);
+// Another player's redraw must not reject the host's round confirmation.
+const roundRef = { round: room.round, gameId: room.gameId };
+await new Promise((resolve) => setTimeout(resolve, 1100)); // personal draw cooldown
+await post(enemy, "spin", { ...roundRef, version: room.version });
+room = await post(host, "nextRound", {
+  winner: "right",
+  ...roundRef,
+  version: room.version,
+});
+assert.equal(room.round, 2);
+assert.deepEqual(room.score, { left: 0, right: 1 });
+assert.equal(room.rounds[0].effects.length, 1);
+await post(host, "nextRound", { winner: "left", ...roundRef, version: room.version }, 409);
 const history = (await get(host, { view: "history", gameId })).data;
 assert(history.every((log) => log.results.every((r) => r.memberId === hostId)));
 await post(
@@ -96,7 +108,21 @@ room = await post(ref, "recover", {
 });
 await get(enemy, {}, 401);
 assert.equal((await get(recovered)).data.meId, enemyId);
-room = await post(ref, "end", { version: room.version });
+room = await post(host, "end", {
+  winner: "left",
+  round: room.round,
+  gameId: room.gameId,
+  version: room.version,
+});
+room = await post(host, "amend", {
+  round: 1,
+  winner: "left",
+  gameId: room.gameId,
+  version: room.version,
+});
+const summary = (await get(recovered, { view: "summary", gameId })).data;
+assert.deepEqual(summary.score, { left: 2, right: 0 });
+assert.equal(summary.rounds[0].effects.length, 2);
 const ended = (await get(host, { view: "history", gameId })).data;
 assert(ended.some((log) => log.results.some((r) => r.memberId === enemyId)));
 const games = (await get(host, { view: "games" })).data;

@@ -84,62 +84,113 @@ export const actionNames = {
   start: "开始并抽取",
   spin: "个人抽取",
   spinAll: "全员重抽",
-  nextRound: "下一回合",
+  nextRound: "确认胜负 · 下一回合",
   end: "结束本场",
+  amend: "修正胜负",
   transfer: "移交房主",
   takeover: "裁判接管",
   recover: "恢复身份",
 };
+export const teamLabel = (team) =>
+  team === "left" ? "左队" : team === "right" ? "右队" : "";
 export function csvCell(value) {
   let text = String(value ?? "");
   if (/^[\s]*[=+@-]/.test(text) || /^[\t\r\n]/.test(text)) text = `'${text}`;
   return `"${text.replaceAll('"', '""')}"`;
 }
-export function downloadHistory(records, code, game, format) {
-  const content =
-    format === "json"
-      ? JSON.stringify({ room: code, game, records }, null, 2)
-      : "\uFEFF" +
-        [
-          [
-            "场次",
-            "回合",
-            "时间",
-            "操作人",
-            "操作",
-            "批次",
-            "游戏昵称",
-            "队伍",
-            "效果",
-          ],
-          ...records.flatMap((row) =>
-            (row.results.length ? row.results : [{}]).map((result) => [
-              game.number,
-              row.round,
-              new Date(row.at).toISOString(),
-              row.actor,
-              actionNames[row.action] || row.action,
-              row.id,
-              result.nickname,
-              result.team === "left"
-                ? "左队"
-                : result.team === "right"
-                  ? "右队"
-                  : "",
-              result.event?.name,
-            ]),
-          ),
-        ]
-          .map((row) => row.map(csvCell).join(","))
-          .join("\r\n");
+const csv = (rows) =>
+  "﻿" + rows.map((row) => row.map(csvCell).join(",")).join("\r\n");
+const iso = (at) => (at ? new Date(at).toISOString() : "");
+export function roundRows(game, rounds) {
+  return [
+    [
+      "场次",
+      "回合",
+      "胜方",
+      "确认人",
+      "确认时间",
+      "修正时间",
+      "游戏昵称",
+      "队伍",
+      "本回合效果",
+      "是否获胜",
+      "本回合重抽次数",
+    ],
+    ...rounds.flatMap((round) =>
+      (round.effects.length ? round.effects : [{}]).map((effect) => [
+        game.number,
+        round.round,
+        teamLabel(round.winner) || "未记录",
+        round.decidedBy,
+        iso(round.decidedAt),
+        iso(round.amendedAt),
+        effect.nickname,
+        teamLabel(effect.team),
+        effect.event?.name,
+        effect.team
+          ? round.winner
+            ? effect.team === round.winner
+              ? "胜"
+              : "负"
+            : ""
+          : "",
+        effect.rerolls ?? "",
+      ]),
+    ),
+  ];
+}
+export function drawRows(game, records) {
+  return [
+    [
+      "场次",
+      "回合",
+      "时间",
+      "操作人",
+      "操作",
+      "批次",
+      "游戏昵称",
+      "队伍",
+      "效果",
+      "回合结果",
+    ],
+    ...records.flatMap((row) =>
+      (row.results.length ? row.results : [{}]).map((result) => [
+        game.number,
+        row.round,
+        iso(row.at),
+        row.actor,
+        actionNames[row.action] || row.action,
+        row.id,
+        result.nickname,
+        teamLabel(result.team),
+        result.event?.name,
+        row.outcome
+          ? `R${row.outcome.round} ${teamLabel(row.outcome.winner) || "未记录"}胜`
+          : "",
+      ]),
+    ),
+  ];
+}
+// kind: "rounds" (CSV per round and player), "draws" (CSV draw log) or "json".
+export function downloadHistory({ code, game, rounds, records, stats }, kind) {
+  const json = kind === "json";
+  const content = json
+    ? JSON.stringify(
+        { room: code, game, rounds, stats, records },
+        null,
+        2,
+      )
+    : csv(kind === "rounds" ? roundRows(game, rounds) : drawRows(game, records));
   const url = URL.createObjectURL(
     new Blob([content], {
-      type: format === "json" ? "application/json" : "text/csv;charset=utf-8",
+      type: json ? "application/json" : "text/csv;charset=utf-8",
     }),
   );
   const a = document.createElement("a");
   a.href = url;
-  a.download = `无畏契约-${code}-第${game.number}场.${format}`;
+  a.download = `无畏契约-${code}-第${game.number}场-${
+    json ? "完整数据.json" : kind === "rounds" ? "回合战绩.csv" : "抽取明细.csv"
+  }`;
   document.body.append(a);
   a.click();
   a.remove();
